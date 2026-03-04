@@ -8,9 +8,23 @@ import java.util.UUID;
 
 public interface InterestService {
 
-    InterestResponse create(InterestCreateRequest r);
+    /**
+     * Creates a new interest.
+     */
+    InterestResponse create(InterestCreateRequest request);
 
+    /**
+     * Retrieves an interest by ID.
+     */
+    InterestResponse get(UUID id);
+
+    /**
+     * Retrieves all interests.
+     */
     List<InterestResponse> getAll();
 
+    /**
+     * Deletes an interest by ID.
+     */
     void delete(UUID id);
 }
