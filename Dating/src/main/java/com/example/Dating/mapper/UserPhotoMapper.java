@@ -10,7 +10,6 @@ public final class UserPhotoMapper {
 
     public static UserPhoto toEntity(UserPhotoCreateRequest r) {
         return UserPhoto.builder()
-                .userId(r.getUserId())
                 .url(r.getUrl())
                 .sortOrder(r.getSortOrder())
                 .isPrimary(Boolean.TRUE.equals(r.getIsPrimary()))

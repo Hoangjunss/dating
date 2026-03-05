@@ -26,7 +26,7 @@ public class UserPhoto {
     private UUID id;
 
     @Column(nullable = false)
-    private UUID userId;
+    private UserProfile userProfile;
 
     @Column(nullable = false)
     private String url;
