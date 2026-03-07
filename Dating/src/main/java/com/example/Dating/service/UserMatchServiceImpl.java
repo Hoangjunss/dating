@@ -2,8 +2,12 @@ package com.example.Dating.service;
 
 import com.example.Dating.dtos.response.UserMatchResponse;
 import com.example.Dating.entities.UserMatch;
+import com.example.Dating.entities.UserProfile;
+import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.UserMatchMapper;
+import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserMatchRepository;
+import com.example.Dating.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +24,7 @@ import java.util.stream.Collectors;
 public class UserMatchServiceImpl implements UserMatchService {
 
     private final UserMatchRepository repository;
+    private final UserProfileRepository userProfileRepository;
 
     @Override
     public UserMatchResponse create(UUID userA, UUID userB) {
@@ -33,9 +38,12 @@ public class UserMatchServiceImpl implements UserMatchService {
                     throw new RuntimeException("Match already exists");
                 });
 
+        UserProfile userFrist = getUserProfile(first);
+        UserProfile userSecond = getUserProfile(second);
+
         UserMatch match = UserMatch.builder()
-                .userAId(first)
-                .userBId(second)
+                .userA(userFrist)
+                .userB(userSecond)
                 .build();
 
         repository.save(match);
@@ -61,5 +69,10 @@ public class UserMatchServiceImpl implements UserMatchService {
         match.setActive(false);
 
         repository.save(match);
+    }
+
+    private UserProfile getUserProfile(UUID id) {
+        return  userProfileRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("UserProfile not found"));
     }
 }
