@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface UserMatchRepository extends JpaRepository<UserMatch, UUID> {
 
-    List<UserMatch> findByUserAIdOrUserBId(UUID a, UUID b);
+    List<UserMatch> findAllByUserA_UserIdAndUserB_UserId(UUID a, UUID b);
 
-    Optional<UserMatch> findByUserAIdAndUserBId(UUID a, UUID b);
+    Optional<UserMatch> findByUserA_UserIdAndUserB_UserId(UUID a, UUID b);
 }
