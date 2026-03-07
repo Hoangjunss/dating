@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class UserMatchServiceImpl implements UserMatchService {
 
     private final UserMatchRepository repository;
-    private final UserProfileRepository userProfileRepository;
+    private final UserProfileService userProfileService;
 
     @Override
     public UserMatchResponse create(UUID userA, UUID userB) {
@@ -72,7 +72,6 @@ public class UserMatchServiceImpl implements UserMatchService {
     }
 
     private UserProfile getUserProfile(UUID id) {
-        return  userProfileRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("UserProfile not found"));
+        return  UserProfileMapper.toEntity(userProfileService.get(id));
     }
 }
