@@ -23,11 +23,13 @@ public class Message {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false)
-    private UUID conversationId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "conversation_id", nullable = false)
+    private Conversation conversation;
 
-    @Column(nullable = false)
-    private UUID senderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "conversation_id", nullable = false)
+    private UserProfile sender;
 
     @Column(nullable = false, length = 2000)
     private String content;
