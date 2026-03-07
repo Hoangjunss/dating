@@ -9,9 +9,9 @@ import java.util.UUID;
 public interface UserInterestRepository
         extends JpaRepository<UserInterest, UUID> {
 
-    List<UserInterest> findByUserId(UUID userId);
+    List<UserInterest> findAllByUserProfile_UserId(UUID userId);
 
-    boolean existsByUserIdAndInterestId(UUID userId, UUID interestId);
+    boolean existsByUserProfile_UserIdAndInterest_Id(UUID userId, UUID interestId);
 
-    void deleteByUserIdAndInterestId(UUID userId, UUID interestId);
+    void deleteByUserProfile_UserIdAndInterest_Id(UUID userId, UUID interestId);
 }
