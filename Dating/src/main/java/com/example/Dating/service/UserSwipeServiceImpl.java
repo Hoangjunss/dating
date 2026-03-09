@@ -22,7 +22,7 @@ public class UserSwipeServiceImpl implements UserSwipeService {
     @Override
     public SwipeResponse swipe(SwipeRequest request) {
 
-        if (repository.existsByFromUserIdAndToUserId(
+        if (repository.existsByFromUser_IdAndToUser_Id(
                 request.getFromUserId(),
                 request.getToUserId())) {
             throw new RuntimeException("Already swiped");
@@ -46,11 +46,11 @@ public class UserSwipeServiceImpl implements UserSwipeService {
     @Override
     public boolean isMatch(UUID userA, UUID userB) {
 
-        return repository.findByFromUserIdAndToUserId(userA, userB)
+        return repository.findByFromUser_IdAndToUser_Id(userA, userB)
                 .filter(UserSwipe::isLiked)
                 .isPresent()
                 &&
-                repository.findByFromUserIdAndToUserId(userB, userA)
+                repository.findByFromUser_IdAndToUser_Id(userB, userA)
                         .filter(UserSwipe::isLiked)
                         .isPresent();
     }
