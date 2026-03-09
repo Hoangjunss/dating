@@ -22,4 +22,9 @@ public class UserPresence {
     private boolean online;
 
     private Instant lastActiveAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.lastActiveAt = Instant.now();
+    }
 }

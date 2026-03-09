@@ -8,12 +8,14 @@ import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.UserPhotoMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserPhotoRepository;
+import com.example.Dating.utils.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -27,6 +29,7 @@ public class UserPhotoServiceImpl implements UserPhotoService {
 
     private final UserPhotoRepository repository;
     private final UserProfileService userProfileService;
+    private final CloudinaryService cloudinaryService;
 
     /**
      * Creates a new user photo.
@@ -37,6 +40,13 @@ public class UserPhotoServiceImpl implements UserPhotoService {
         log.info("Creating photo for userId: {}", request.getUserId());
         
         UserPhoto entity = UserPhotoMapper.toEntity(request);
+        if(request.getImage() != null && !request.getImage().isEmpty()){
+            Map<String, Object> imageUrl = cloudinaryService.uploadFile(request.getImage(), "product");
+            entity.setUrl((String) imageUrl.get("url"));
+        }else{
+            entity.setUrl(null);
+        }
+
         UserProfile userProfile = UserProfileMapper.toEntity(userProfileService.get(request.getUserId()));
         entity.setUserProfile(userProfile);
         repository.save(entity);
@@ -69,7 +79,7 @@ public class UserPhotoServiceImpl implements UserPhotoService {
     public List<UserPhotoResponse> getByUser(UUID userId) {
         log.debug("Fetching photos for userId: {}", userId);
         
-        return repository.findByUserId(userId)
+        return repository.findByUserProfile_UserId(userId)
                 .stream()
                 .map(UserPhotoMapper::toResponse)
                 .toList();

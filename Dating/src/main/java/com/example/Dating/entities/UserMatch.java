@@ -29,11 +29,13 @@ public class UserMatch {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false)
-    private UUID userAId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_a_id", nullable = false)
+    private UserProfile userA;
 
-    @Column(nullable = false)
-    private UUID userBId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_b_id", nullable = false)
+    private UserProfile userB;
 
     // allow unmatch / soft delete
     private Boolean active;

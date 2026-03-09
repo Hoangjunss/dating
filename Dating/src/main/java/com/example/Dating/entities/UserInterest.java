@@ -29,9 +29,11 @@ public class UserInterest {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_profile_id", nullable = false)
     private UserProfile userProfile;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interest_id", nullable = false)
     private Interest interest;
 }

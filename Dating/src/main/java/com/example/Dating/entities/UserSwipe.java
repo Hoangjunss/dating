@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -31,15 +32,22 @@ public class UserSwipe {
     private UUID id;
 
     // who swipes
-    @Column(nullable = false)
-    private UUID fromUserId;
+    @ManyToOne
+    @JoinColumn(name = "from_user_id", nullable = false)
+    private UserProfile fromUser;
 
     // target user
-    @Column(nullable = false)
-    private UUID toUserId;
+    @ManyToOne
+    @JoinColumn(name = "to_user_id", nullable = false)
+    private UserProfile toUser;
 
     // true = like, false = pass
     private boolean isLiked;
 
     private Instant createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = Instant.now();
+    }
 }

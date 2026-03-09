@@ -21,7 +21,7 @@ public final class UserProfileMapper {
      */
     public static UserProfile toEntity(UserProfileCreateRequest req) {
         return UserProfile.builder()
-                .userId(req.getUserId())
+                //.userId(req.getUserId())
                 .displayName(req.getDisplayName())
                 .gender(req.getGender())
                 .birthday(req.getBirthday())

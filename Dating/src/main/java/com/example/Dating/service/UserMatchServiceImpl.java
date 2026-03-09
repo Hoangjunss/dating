@@ -2,7 +2,9 @@ package com.example.Dating.service;
 
 import com.example.Dating.dtos.response.UserMatchResponse;
 import com.example.Dating.entities.UserMatch;
+import com.example.Dating.entities.UserProfile;
 import com.example.Dating.mapper.UserMatchMapper;
+import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserMatchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class UserMatchServiceImpl implements UserMatchService {
 
     private final UserMatchRepository repository;
+    private final UserProfileService userProfileService;
 
     @Override
     public UserMatchResponse create(UUID userA, UUID userB) {
@@ -28,14 +31,17 @@ public class UserMatchServiceImpl implements UserMatchService {
         UUID first = userA.compareTo(userB) < 0 ? userA : userB;
         UUID second = userA.compareTo(userB) < 0 ? userB : userA;
 
-        repository.findByUserAIdAndUserBId(first, second)
+        repository.findByUserA_UserIdAndUserB_UserId(first, second)
                 .ifPresent(m -> {
                     throw new RuntimeException("Match already exists");
                 });
 
+        UserProfile userFrist = getUserProfile(first);
+        UserProfile userSecond = getUserProfile(second);
+
         UserMatch match = UserMatch.builder()
-                .userAId(first)
-                .userBId(second)
+                .userA(userFrist)
+                .userB(userSecond)
                 .build();
 
         repository.save(match);
@@ -46,7 +52,7 @@ public class UserMatchServiceImpl implements UserMatchService {
     @Override
     public List<UserMatchResponse> getMatches(UUID userId) {
 
-        return repository.findByUserAIdOrUserBId(userId, userId)
+        return repository.findAllByUserA_UserIdAndUserB_UserId(userId, userId)
                 .stream()
                 .map(UserMatchMapper::toResponse)
                 .collect(Collectors.toList());
@@ -61,5 +67,9 @@ public class UserMatchServiceImpl implements UserMatchService {
         match.setActive(false);
 
         repository.save(match);
+    }
+
+    private UserProfile getUserProfile(UUID id) {
+        return  UserProfileMapper.toEntity(userProfileService.get(id));
     }
 }
