@@ -11,8 +11,8 @@ import java.util.UUID;
 @Setter
 public class UserProfileCreateRequest {
 
-    @NotNull(message = "User ID cannot be null")
-    private UUID userId;
+//    @NotNull(message = "User ID cannot be null")
+//    private UUID userId;
     
     @NotBlank(message = "Display name cannot be blank")
     @Size(min = 2, max = 100, message = "Display name must be between 2 and 100 characters")

@@ -2,16 +2,20 @@ package com.example.Dating.service;
 
 import com.example.Dating.dtos.request.UserProfileCreateRequest;
 import com.example.Dating.dtos.request.UserProfileUpdateRequest;
+import com.example.Dating.dtos.response.UserPreferenceResponse;
 import com.example.Dating.dtos.response.UserProfileResponse;
+import com.example.Dating.entities.UserPreference;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserProfileRepository;
+import com.example.Dating.specification.UserProfileSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +39,7 @@ import java.util.stream.Collectors;
 public class UserProfileServiceImpl implements UserProfileService {
 
     private final UserProfileRepository repository;
+    private final UserPreferenceService userPreferenceService;
 
     /**
      * Creates a new user profile.
@@ -48,11 +53,6 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Transactional
     public UserProfileResponse create(UserProfileCreateRequest request) {
         log.info("Creating user profile with displayName: {}", request.getDisplayName());
-        
-        if (repository.existsByDisplayName(request.getDisplayName())) {
-            log.warn("Display name already exists: {}", request.getDisplayName());
-            throw new DuplicateResourceException("Display name '" + request.getDisplayName() + "' already exists");
-        }
 
         UserProfile entity = UserProfileMapper.toEntity(request);
         repository.save(entity);
@@ -73,12 +73,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     public UserProfileResponse get(UUID userId) {
         log.debug("Fetching profile for userId: {}", userId);
         
-        return repository.findById(userId)
-                .map(UserProfileMapper::toResponse)
-                .orElseThrow(() -> {
-                    log.warn("Profile not found for userId: {}", userId);
-                    return new ResourceNotFoundException("Profile not found with userId: " + userId);
-                });
+        return UserProfileMapper.toResponse(findById(userId));
     }
 
     /**
@@ -105,10 +100,16 @@ public class UserProfileServiceImpl implements UserProfileService {
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<UserProfileResponse> getAllPaginated(Pageable pageable) {
-        log.debug("Fetching profiles with pagination: {}", pageable);
-        
-        return repository.findAll(pageable)
+    public Page<UserProfileResponse> getAllPaginated(UUID userId, Pageable pageable) {
+
+        UserPreferenceResponse pref = userPreferenceService.get(userId);
+        UserProfile currentUser = repository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Specification<UserProfile> spec = UserProfileSpecification
+                .filter(userId, currentUser, pref);
+
+        return repository.findAll(spec, pageable)
                 .map(UserProfileMapper::toResponse);
     }
 
@@ -126,11 +127,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     public UserProfileResponse update(UUID userId, UserProfileUpdateRequest request) {
         log.info("Updating profile for userId: {}", userId);
         
-        UserProfile entity = repository.findById(userId)
-                .orElseThrow(() -> {
-                    log.warn("Profile not found for update, userId: {}", userId);
-                    return new ResourceNotFoundException("Profile not found with userId: " + userId);
-                });
+        UserProfile entity = findById(userId);
 
         UserProfileMapper.updateEntity(entity, request);
         repository.save(entity);
@@ -157,5 +154,14 @@ public class UserProfileServiceImpl implements UserProfileService {
         
         repository.deleteById(userId);
         log.info("Profile deleted successfully for userId: {}", userId);
+    }
+
+    // Helper
+    private UserProfile findById(UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Profile not found for update, userId: {}", id);
+                    return new ResourceNotFoundException("Profile not found with userId: " + id);
+                });
     }
 }

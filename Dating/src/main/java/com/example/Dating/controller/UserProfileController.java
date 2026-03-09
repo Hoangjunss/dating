@@ -79,12 +79,13 @@ public class UserProfileController {
      * @param pageable Pagination parameters (page, size, sort)
      * @return Paginated list of user profiles
      */
-    @GetMapping("/paginated")
+    @GetMapping("/{userId}/paginated")
     public ResponseEntity<Page<UserProfileResponse>> getAllPaginated(
+            @PathVariable UUID userId,
             Pageable pageable) {
         log.info("GET /api/profiles/paginated - Fetching paginated profiles: {}", pageable);
         
-        Page<UserProfileResponse> responses = userProfileService.getAllPaginated(pageable);
+        Page<UserProfileResponse> responses = userProfileService.getAllPaginated(userId, pageable);
         return ResponseEntity.ok(responses);
     }
 

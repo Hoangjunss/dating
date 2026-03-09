@@ -34,7 +34,7 @@ public interface UserProfileService {
     /**
      * Retrieves profiles with pagination support.
      */
-    Page<UserProfileResponse> getAllPaginated(Pageable pageable);
+    Page<UserProfileResponse> getAllPaginated(UUID userId, Pageable pageable);
 
     /**
      * Deletes a profile.
