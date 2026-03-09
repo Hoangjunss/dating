@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-DatingApplication<Dating>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.Dating.DatingApplication",
+            "projectName": "Dating",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
