@@ -8,5 +8,5 @@ import java.util.UUID;
 public class SwipeRequest {
     private UUID fromUserId;
     private UUID toUserId;
-    private boolean liked;
+    private boolean isLiked;
 }

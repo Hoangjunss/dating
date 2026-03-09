@@ -12,9 +12,7 @@ public final class UserSwipeMapper {
 
     public static UserSwipe toEntity(SwipeRequest r) {
         return UserSwipe.builder()
-                .fromUserId(r.getFromUserId())
-                .toUserId(r.getToUserId())
-                .liked(r.isLiked())
+                .isLiked(r.isLiked())
                 .createdAt(Instant.now())
                 .build();
     }

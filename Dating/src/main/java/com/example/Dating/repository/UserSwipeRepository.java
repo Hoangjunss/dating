@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface UserSwipeRepository extends JpaRepository<UserSwipe, UUID> {
 
-    boolean existsByFromUserIdAndToUserId(UUID from, UUID to);
+    boolean existsByFromUser_IdAndToUser_Id(UUID from, UUID to);
 
-    Optional<UserSwipe> findByFromUserIdAndToUserId(UUID from, UUID to);
+    Optional<UserSwipe> findByFromUser_IdAndToUser_Id(UUID from, UUID to);
 }

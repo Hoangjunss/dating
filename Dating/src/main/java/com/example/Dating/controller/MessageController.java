@@ -16,11 +16,6 @@ public class MessageController {
 
     private final MessageService service;
 
-    @PostMapping
-    public MessageResponse send(@RequestBody MessageSendRequest request) {
-        return service.send(request);
-    }
-
     @GetMapping("/{conversationId}")
     public List<MessageResponse> getMessages(@PathVariable UUID conversationId) {
         return service.getMessages(conversationId);
