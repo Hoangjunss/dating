@@ -2,7 +2,9 @@ package com.example.Dating.service;
 
 import com.example.Dating.dtos.request.SwipeRequest;
 import com.example.Dating.dtos.response.SwipeResponse;
+import com.example.Dating.entities.UserProfile;
 import com.example.Dating.entities.UserSwipe;
+import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.mapper.UserSwipeMapper;
 import com.example.Dating.repository.UserSwipeRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import java.util.UUID;
 public class UserSwipeServiceImpl implements UserSwipeService {
 
     private final UserSwipeRepository repository;
+    private final UserProfileService userProfileService;
 
     @Override
     public SwipeResponse swipe(SwipeRequest request) {
@@ -26,6 +29,10 @@ public class UserSwipeServiceImpl implements UserSwipeService {
         }
 
         var entity = UserSwipeMapper.toEntity(request);
+        UserProfile fromUser = UserProfileMapper.toEntity(userProfileService.get(request.getFromUserId()));
+        UserProfile toUser = UserProfileMapper.toEntity(userProfileService.get(request.getToUserId()));
+        entity.setFromUser(fromUser);
+        entity.setToUser(toUser);
 
         repository.save(entity);
 
