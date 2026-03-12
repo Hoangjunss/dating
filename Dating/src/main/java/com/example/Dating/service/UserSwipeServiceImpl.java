@@ -14,6 +14,7 @@ import com.example.Dating.mapper.UserMatchMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.mapper.UserSwipeMapper;
 import com.example.Dating.repository.UserSwipeRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.sql.model.ast.builder.CollectionRowDeleteByUpdateSetNullBuilder;
 import org.springframework.stereotype.Service;
@@ -24,45 +25,57 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserSwipeServiceImpl implements UserSwipeService {
 
-    private final UserSwipeRepository repository;
+    private final UserSwipeRepository swipeRepository;
     private final UserProfileService userProfileService;
     private final UserMatchService userMatchService;
     private final ConversationService conversationService;
 
+    @Transactional
     @Override
     public SwipeResultResponse swipe(SwipeRequest request) {
+        UUID fromId = request.getFromUserId();
+        UUID toId   = request.getToUserId();
 
-        if (repository.existsByFromUser_IdAndToUser_Id(
-                request.getFromUserId(),
-                request.getToUserId())) {
-            throw new RuntimeException("Already swiped");
+        if (fromId.equals(toId)) {
+            throw new IllegalArgumentException("Cannot swipe yourself");
         }
 
-        var entity = UserSwipeMapper.toEntity(request);
-        UserProfile fromUser = UserProfileMapper.toEntity(userProfileService.get(request.getFromUserId()));
-        UserProfile toUser = UserProfileMapper.toEntity(userProfileService.get(request.getToUserId()));
-        entity.setFromUser(fromUser);
-        entity.setToUser(toUser);
+        if (swipeRepository.existsByFromUser_IdAndToUser_Id(fromId, toId)) {
+            throw new IllegalStateException("You have already swiped this user");
+        }
 
-        repository.save(entity);
+        UserProfile fromUser = userProfileService.findEntityById(fromId);
+        UserProfile toUser   = userProfileService.findEntityById(toId);
 
-        boolean isMutualLike = isMatch(request.getFromUserId(), request.getToUserId());
+        UserSwipe swipe = UserSwipe.builder()
+                .fromUser(fromUser)
+                .toUser(toUser)
+                .isLiked(request.isLiked())
+                .build();
+
+        swipe = swipeRepository.save(swipe);
+
+        boolean isMutualLike = request.isLiked() &&
+                swipeRepository.existsMutualLike(fromId, toId);
 
         UUID matchId = null;
         UUID conversationId = null;
 
-        if (isMutualLike){
-            // Tạo match
-            UserMatchResponse match = userMatchService.create(request.getFromUserId(), request.getToUserId());
-            matchId = match.getId();
+        if (isMutualLike) {
+            UserMatchResponse matchResp = userMatchService.create(fromId, toId);
+            matchId = matchResp.getId();
 
-            // Tạo conversation
-            ConversationCreateRequest conversationCreateRequest =  new ConversationCreateRequest(request.getFromUserId(), request.getToUserId());
-            ConversationResponse conv = conversationService.create(conversationCreateRequest); // thêm method này
-            conversationId = conv.getId();
+            ConversationResponse convResp = conversationService.createOrGet(fromId, toId);
+            conversationId = convResp.getId();
         }
 
-        return new SwipeResultResponse(entity.getId(), request.isLiked(), isMutualLike, matchId, conversationId);
+        return new SwipeResultResponse(
+                swipe.getId(),
+                swipe.isLiked(),
+                isMutualLike,
+                matchId,
+                conversationId
+        );
     }
 
     /**
@@ -72,12 +85,12 @@ public class UserSwipeServiceImpl implements UserSwipeService {
     @Override
     public boolean isMatch(UUID userA, UUID userB) {
 
-        return repository.findByFromUser_IdAndToUser_Id(userA, userB)
+        return swipeRepository.findByFromUser_IdAndToUser_Id(userA, userB)
                 .filter(UserSwipe::isLiked)
                 .isPresent()
                 &&
-                repository.findByFromUser_IdAndToUser_Id(userB, userA)
+                swipeRepository.findByFromUser_IdAndToUser_Id(userB, userA)
                         .filter(UserSwipe::isLiked)
                         .isPresent();
-    }
+        }
 }
