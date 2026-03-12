@@ -12,4 +12,6 @@ public interface UserMatchService {
     List<UserMatchResponse> getMatches(UUID userId);
 
     void unmatch(UUID matchId);
+
+    boolean hasActiveMatch(UUID userAId,  UUID userBId);
 }

@@ -12,4 +12,6 @@ public interface UserMatchRepository extends JpaRepository<UserMatch, UUID> {
     List<UserMatch> findAllByUserA_UserIdAndUserB_UserId(UUID a, UUID b);
 
     Optional<UserMatch> findByUserA_UserIdAndUserB_UserId(UUID a, UUID b);
+
+    boolean hasActiveMatchByUserA_UserIdAndUserB_UserId(UUID a, UUID b);
 }
