@@ -37,7 +37,6 @@ public class ConversationServiceImpl implements ConversationService {
             throw new IllegalStateException("Conversation already exists");
         }
 
-        // Check match trước (thêm bảo vệ)
         if (!userMatchService.hasActiveMatch(a, b)) {
             throw new IllegalStateException("Conversation can only be created between matched users");
         }

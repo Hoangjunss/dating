@@ -164,7 +164,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         log.info("Profile deleted successfully for userId: {}", userId);
     }
 
-    // Helper
     private UserProfile findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> {
