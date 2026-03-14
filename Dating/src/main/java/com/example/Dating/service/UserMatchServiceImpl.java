@@ -73,7 +73,7 @@ public class UserMatchServiceImpl implements UserMatchService {
     @Override
     public boolean hasActiveMatch(UUID userAId, UUID userBId) {
         log.debug("Checking if match exists");
-        return repository.hasActiveMatchByUserA_UserIdAndUserB_UserId(userAId, userBId);
+        return repository.existsByUserA_UserIdAndUserB_UserIdAndActiveTrue(userAId, userBId);
     }
 
     @Override

@@ -59,7 +59,7 @@ public class ConversationServiceImpl implements ConversationService {
         UUID first  = user1.compareTo(user2) < 0 ? user1 : user2;
         UUID second = user1.compareTo(user2) < 0 ? user2 : user1;
 
-        Optional<Conversation> existing = repository.findByUserAIdAndUserBId(first, second);
+        Optional<Conversation> existing = repository.findByUserAUserIdAndUserBUserId(first, second);
         if (existing.isPresent()) {
             return ConversationMapper.toResponse(existing.get());
         }
@@ -90,7 +90,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public List<ConversationResponse> getUserConversations(UUID userId) {
-        return repository.findByUserAIdOrUserBId(userId, userId)
+        return repository.findByUserAUserIdOrUserBUserId(userId, userId)
                 .stream()
                 .map(ConversationMapper::toResponse)
                 .toList();

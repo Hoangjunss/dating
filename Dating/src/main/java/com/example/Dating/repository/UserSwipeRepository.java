@@ -10,7 +10,8 @@ import java.util.UUID;
 
 public interface UserSwipeRepository extends JpaRepository<UserSwipe, UUID> {
 
-    boolean existsByFromUser_IdAndToUser_Id(UUID from, UUID to);
+    boolean existsByFromUser_UserIdAndToUser_UserId(UUID from, UUID to);
+
 
     @Query("SELECT COUNT(s) = 2 " +
             "FROM UserSwipe s " +

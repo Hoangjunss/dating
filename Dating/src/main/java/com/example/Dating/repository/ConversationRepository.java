@@ -10,9 +10,10 @@ import java.util.UUID;
 public interface ConversationRepository
         extends JpaRepository<Conversation, UUID> {
 
-    Optional<Conversation> findByUserAIdAndUserBId(UUID a, UUID b);
+    Optional<Conversation> findByUserAUserIdAndUserBUserId(UUID userAId, UUID userBId);
 
-    List<Conversation> findByUserAIdOrUserBId(UUID a, UUID b);
+
+    List<Conversation> findByUserAUserIdOrUserBUserId(UUID a, UUID b);
 
     Optional<Conversation> findByUserA_UserIdAndUserB_UserId(UUID a, UUID b);
 

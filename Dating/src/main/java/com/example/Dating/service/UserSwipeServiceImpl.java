@@ -34,7 +34,7 @@ public class UserSwipeServiceImpl implements UserSwipeService {
             throw new IllegalArgumentException("Cannot swipe yourself");
         }
 
-        if (swipeRepository.existsByFromUser_IdAndToUser_Id(fromId, toId)) {
+        if (swipeRepository.existsByFromUser_UserIdAndToUser_UserId(fromId, toId)) {
             throw new IllegalStateException("You have already swiped this user");
         }
 

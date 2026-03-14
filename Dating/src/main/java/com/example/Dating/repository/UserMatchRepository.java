@@ -15,7 +15,8 @@ public interface UserMatchRepository extends JpaRepository<UserMatch, UUID> {
 
     Optional<UserMatch> findByUserA_UserIdAndUserB_UserId(UUID a, UUID b);
 
-    boolean hasActiveMatchByUserA_UserIdAndUserB_UserId(UUID a, UUID b);
+    boolean existsByUserA_UserIdAndUserB_UserIdAndActiveTrue(UUID a, UUID b);
+
 
     @Query("SELECT m FROM UserMatch m " +
             "WHERE (m.userA.userId = :userId OR m.userB.userId = :userId) " +
