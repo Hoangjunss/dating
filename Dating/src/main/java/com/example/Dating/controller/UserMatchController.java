@@ -29,8 +29,8 @@ public class UserMatchController {
 
     // get all matches of a user
     @GetMapping("/{userId}")
-    public List<UserMatchResponse> getMatches(@PathVariable UUID userId) {
-        return service.getMatches(userId);
+    public List<UserMatchResponse> getActiveMatches(@PathVariable UUID userId) {
+        return service.getActiveMatches(userId);
     }
 
     // unmatch
