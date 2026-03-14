@@ -1,26 +1,20 @@
 package com.example.Dating.service;
 
-import com.example.Dating.dtos.request.ConversationCreateRequest;
 import com.example.Dating.dtos.request.SwipeRequest;
 import com.example.Dating.dtos.response.ConversationResponse;
-import com.example.Dating.dtos.response.SwipeResponse;
 import com.example.Dating.dtos.response.SwipeResultResponse;
 import com.example.Dating.dtos.response.UserMatchResponse;
-import com.example.Dating.entities.Conversation;
-import com.example.Dating.entities.UserMatch;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.entities.UserSwipe;
-import com.example.Dating.mapper.UserMatchMapper;
-import com.example.Dating.mapper.UserProfileMapper;
-import com.example.Dating.mapper.UserSwipeMapper;
 import com.example.Dating.repository.UserSwipeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.sql.model.ast.builder.CollectionRowDeleteByUpdateSetNullBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserSwipeServiceImpl implements UserSwipeService {
@@ -53,7 +47,7 @@ public class UserSwipeServiceImpl implements UserSwipeService {
                 .isLiked(request.isLiked())
                 .build();
 
-        swipe = swipeRepository.save(swipe);
+        swipe = swipeRepository.saveAndFlush(swipe);
 
         boolean isMutualLike = request.isLiked() &&
                 swipeRepository.existsMutualLike(fromId, toId);
@@ -84,13 +78,7 @@ public class UserSwipeServiceImpl implements UserSwipeService {
      */
     @Override
     public boolean isMatch(UUID userA, UUID userB) {
-
-        return swipeRepository.findByFromUser_IdAndToUser_Id(userA, userB)
-                .filter(UserSwipe::isLiked)
-                .isPresent()
-                &&
-                swipeRepository.findByFromUser_IdAndToUser_Id(userB, userA)
-                        .filter(UserSwipe::isLiked)
-                        .isPresent();
-        }
+    log.debug("Checking if UserA {} and UserB {}", userA, userB);
+        return swipeRepository.existsMutualLike(userA, userB);
+    }
 }
