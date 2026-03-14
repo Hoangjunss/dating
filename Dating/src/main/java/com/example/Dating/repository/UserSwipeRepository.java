@@ -18,6 +18,4 @@ public interface UserSwipeRepository extends JpaRepository<UserSwipe, UUID> {
             "   OR (s.fromUser.userId = :user2 AND s.toUser.userId = :user1 AND s.isLiked = true)")
     boolean existsMutualLike(@Param("user1") UUID user1, @Param("user2") UUID user2);
 
-    Optional<UserSwipe> findByFromUser_IdAndToUser_Id(UUID fromUserId, UUID toUserId);
-
 }
