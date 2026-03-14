@@ -3,6 +3,7 @@ package com.example.Dating.service;
 import com.example.Dating.dtos.request.UserProfileCreateRequest;
 import com.example.Dating.dtos.request.UserProfileUpdateRequest;
 import com.example.Dating.dtos.response.UserProfileResponse;
+import com.example.Dating.entities.UserProfile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -25,6 +26,10 @@ public interface UserProfileService {
      * Updates an existing profile.
      */
     UserProfileResponse update(UUID userId, UserProfileUpdateRequest request);
+    /*
+    * Find entity by User
+     */
+    UserProfile findEntityById(UUID id);
 
     /**
      * Retrieves all profiles.

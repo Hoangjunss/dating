@@ -10,6 +10,7 @@ import com.example.Dating.mapper.MessageMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.ConversationRepository;
 import com.example.Dating.repository.MessageRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,22 +23,31 @@ public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository repository;
     private final ConversationRepository conversationRepository;
-
+    private final UserMatchService userMatchService;
     private final UserProfileService  userProfileService;
 
     @Override
+    @Transactional
     public MessageResponse send(MessageSendRequest request) {
 
         Conversation conversation = conversationRepository.findById(request.getConversationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Conversation not found for id : " + request.getConversationId()));
 
-        UserProfile userSender = UserProfileMapper.toEntity(userProfileService.get(request.getSenderId()));
+        UserProfile userSender = userProfileService.findEntityById(request.getSenderId());
 
         boolean isMember = conversation.getUserA().getUserId().equals(userSender.getUserId())
                 || conversation.getUserB().getUserId().equals(userSender.getUserId());
 
         if (!isMember) {
             throw new RuntimeException("User is not part of this conversation");
+        }
+
+        UUID otherId = conversation.getUserA().getUserId().equals(userSender.getUserId())
+                ? conversation.getUserB().getUserId()
+                : conversation.getUserA().getUserId();
+
+        if (!userMatchService.hasActiveMatch(userSender.getUserId(), otherId)) {
+            throw new IllegalStateException("You can only message active matches");
         }
 
         Message message = Message.builder()

@@ -46,7 +46,7 @@ public class UserInterestServiceImpl implements UserInterestService {
         }
 
         UserInterest entity = UserInterestMapper.toEntity(request);
-        UserProfile userProfile = UserProfileMapper.toEntity(userProfileService.get(request.getUserId()));
+        UserProfile userProfile = userProfileService.findEntityById(request.getUserId());
         Interest interest = Interest.builder().id(request.getInterestId()).build();
         entity.setUserProfile(userProfile);
         entity.setInterest(interest);

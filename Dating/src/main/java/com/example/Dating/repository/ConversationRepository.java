@@ -13,4 +13,7 @@ public interface ConversationRepository
     Optional<Conversation> findByUserAIdAndUserBId(UUID a, UUID b);
 
     List<Conversation> findByUserAIdOrUserBId(UUID a, UUID b);
+
+    Optional<Conversation> findByUserA_UserIdAndUserB_UserId(UUID a, UUID b);
+
 }

@@ -10,6 +10,8 @@ public interface ConversationService {
 
     ConversationResponse create(ConversationCreateRequest request);
 
+    ConversationResponse createOrGet(UUID user1, UUID user2);
+
     ConversationResponse findById(UUID id);
 
     List<ConversationResponse> getUserConversations(UUID userId);

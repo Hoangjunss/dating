@@ -7,9 +7,11 @@ import com.example.Dating.mapper.UserMatchMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserMatchRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
  * Handles match business logic.
  * Match is created only when two users mutually like each other.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserMatchServiceImpl implements UserMatchService {
@@ -50,12 +53,10 @@ public class UserMatchServiceImpl implements UserMatchService {
     }
 
     @Override
-    public List<UserMatchResponse> getMatches(UUID userId) {
+    public Optional<UserMatchResponse> getMatchBetween(UUID userAId, UUID userBId) {
 
-        return repository.findAllByUserA_UserIdAndUserB_UserId(userId, userId)
-                .stream()
-                .map(UserMatchMapper::toResponse)
-                .collect(Collectors.toList());
+        return repository.findByUserA_UserIdAndUserB_UserId(userAId, userBId)
+                .map(UserMatchMapper::toResponse);
     }
 
     @Override
@@ -69,7 +70,30 @@ public class UserMatchServiceImpl implements UserMatchService {
         repository.save(match);
     }
 
+    @Override
+    public boolean hasActiveMatch(UUID userAId, UUID userBId) {
+        log.debug("Checking if match exists");
+        return repository.hasActiveMatchByUserA_UserIdAndUserB_UserId(userAId, userBId);
+    }
+
+    @Override
+    public List<UserMatchResponse> getActiveMatches(UUID userId) {
+        return repository.findActiveMatchesByUserId(userId)
+                .stream()
+                .map(UserMatchMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserMatchResponse> getAllMatches(UUID userId) {
+        return repository.findAllByUserId(userId)
+                .stream()
+                .map(UserMatchMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+
     private UserProfile getUserProfile(UUID id) {
-        return  UserProfileMapper.toEntity(userProfileService.get(id));
+        return  userProfileService.findEntityById(id);
     }
 }

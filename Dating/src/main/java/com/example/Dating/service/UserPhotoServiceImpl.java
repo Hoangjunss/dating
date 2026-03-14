@@ -47,7 +47,7 @@ public class UserPhotoServiceImpl implements UserPhotoService {
             entity.setUrl(null);
         }
 
-        UserProfile userProfile = UserProfileMapper.toEntity(userProfileService.get(request.getUserId()));
+        UserProfile userProfile = userProfileService.findEntityById(request.getUserId());
         entity.setUserProfile(userProfile);
         repository.save(entity);
         

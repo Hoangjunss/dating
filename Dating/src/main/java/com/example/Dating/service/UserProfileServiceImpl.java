@@ -11,6 +11,7 @@ import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserProfileRepository;
 import com.example.Dating.specification.UserProfileSpecification;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -136,6 +138,12 @@ public class UserProfileServiceImpl implements UserProfileService {
         return UserProfileMapper.toResponse(entity);
     }
 
+    @Override
+    public UserProfile findEntityById(UUID id) {
+        log.debug("Fetching profile for userId: {}", id);
+        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
     /**
      * Deletes a profile by userId.
      * 
@@ -156,7 +164,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         log.info("Profile deleted successfully for userId: {}", userId);
     }
 
-    // Helper
     private UserProfile findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> {
