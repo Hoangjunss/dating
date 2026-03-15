@@ -14,7 +14,12 @@ public class MessageResponse {
 
     private UUID id;
     private UUID senderId;
+    private UUID conversationId;
+
     private String content;
+
     private Boolean seen;
     private Instant sentAt;
+
+    private Boolean unsent;
 }
