@@ -17,7 +17,7 @@ import java.util.UUID;
 @Table(
         name = "user_swipes",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"fromUserId", "toUserId"})
+                @UniqueConstraint(columnNames = {"from_user_id", "to_user_id"})
         }
 )
 @Getter

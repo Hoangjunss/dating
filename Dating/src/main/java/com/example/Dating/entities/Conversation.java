@@ -14,7 +14,7 @@ import java.util.UUID;
 @Table(
         name = "conversations",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"userAId", "userBId"})
+                @UniqueConstraint(columnNames = {"user_a_id", "user_b_id"})
         }
 )
 @Getter
