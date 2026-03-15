@@ -1,7 +1,5 @@
 package com.example.Dating.entities;
 
-
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +17,6 @@ import java.util.UUID;
 public class UserProfile {
 
     @Id
-    @GeneratedValue
     private UUID userId;
 
     @Column(nullable = false)
@@ -49,6 +46,11 @@ public class UserProfile {
     private Instant createdAt;
 
     private Instant updatedAt;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @PrePersist
     void prePersist() {
