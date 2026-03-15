@@ -36,8 +36,6 @@ public class AuthController {
      * POST /api/auth/login
      * Body: { "identifier": "alice" | "alice@example.com", "password": "123456" }
      * Response 200: { "userId": "uuid", "username": "alice", "email": "...", "hasProfile": true/false }
-     *
-     * Use "identifier" — the client can pass either username or email, the server will detect automatically.
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
