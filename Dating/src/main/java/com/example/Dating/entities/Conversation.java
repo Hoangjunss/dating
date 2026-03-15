@@ -28,9 +28,13 @@ public class Conversation {
     @GeneratedValue
     private UUID id;
 
-    private UUID userAId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_a_id")
+    private UserProfile userAId;
 
-    private UUID userBId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_b_id")
+    private UserProfile userBId;
 
     private Instant createdAt;
 

@@ -7,7 +7,18 @@ import java.util.UUID;
 
 public interface UserPreferenceService {
 
-    UserPreferenceResponse save(UUID userId, UserPreferenceRequest r);
+    /**
+     * Creates or updates user preferences.
+     */
+    UserPreferenceResponse save(UUID userId, UserPreferenceRequest request);
 
+    /**
+     * Retrieves user preferences.
+     */
     UserPreferenceResponse get(UUID userId);
+
+    /**
+     * Deletes user preferences.
+     */
+    void delete(UUID userId);
 }

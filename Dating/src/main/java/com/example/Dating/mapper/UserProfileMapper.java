@@ -35,6 +35,20 @@ public final class UserProfileMapper {
                 .build();
     }
 
+    public static UserProfile toEntity(UserProfileResponse resp) {
+        return UserProfile.builder()
+                .userId(resp.getUserId())
+                .displayName(resp.getDisplayName())
+                .gender(resp.getGender())
+                .birthday(resp.getBirthday())
+                .bio(resp.getBio())
+                .heightCm(Integer.valueOf(resp.getHeightCm()))
+                .job(resp.getJob())
+                .education(resp.getEducation())
+                .city(resp.getCity())
+                .build();
+    }
+
     /**
      * Converts entity to response DTO.
      * Used to hide internal fields and expose only safe data.

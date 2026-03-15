@@ -25,8 +25,9 @@ public class UserPhoto {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false)
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_profile", nullable = false)
+    private UserProfile userProfile;
 
     @Column(nullable = false)
     private String url;
