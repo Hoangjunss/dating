@@ -27,6 +27,7 @@ public class UserSwipeServiceImpl implements UserSwipeService {
     @Transactional
     @Override
     public SwipeResultResponse swipe(SwipeRequest request) {
+        log.info("swipe request: {}", request);
         UUID fromId = request.getFromUserId();
         UUID toId   = request.getToUserId();
 
@@ -50,7 +51,7 @@ public class UserSwipeServiceImpl implements UserSwipeService {
         swipe = swipeRepository.saveAndFlush(swipe);
 
         boolean isMutualLike = request.isLiked() &&
-                swipeRepository.existsMutualLike(fromId, toId);
+                swipeRepository.existsByFromUser_UserIdAndToUser_UserIdAndIsLikedTrue(toId, fromId);
 
         UUID matchId = null;
         UUID conversationId = null;
@@ -79,6 +80,6 @@ public class UserSwipeServiceImpl implements UserSwipeService {
     @Override
     public boolean isMatch(UUID userA, UUID userB) {
     log.debug("Checking if UserA {} and UserB {}", userA, userB);
-        return swipeRepository.existsMutualLike(userA, userB);
+        return swipeRepository.existsByFromUser_UserIdAndToUser_UserIdAndIsLikedTrue(userA, userB);
     }
 }
