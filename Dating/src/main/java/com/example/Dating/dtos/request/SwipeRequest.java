@@ -1,5 +1,6 @@
 package com.example.Dating.dtos.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.UUID;
@@ -8,5 +9,7 @@ import java.util.UUID;
 public class SwipeRequest {
     private UUID fromUserId;
     private UUID toUserId;
+
+    @JsonProperty("isLiked")
     private boolean isLiked;
 }

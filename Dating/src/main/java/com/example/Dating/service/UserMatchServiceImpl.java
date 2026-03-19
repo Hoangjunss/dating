@@ -52,13 +52,13 @@ public class UserMatchServiceImpl implements UserMatchService {
         return UserMatchMapper.toResponse(match);
     }
 
-    @Override
     public Optional<UserMatchResponse> getMatchBetween(UUID userAId, UUID userBId) {
+        UUID first = userAId.compareTo(userBId) < 0 ? userAId : userBId;
+        UUID second = userAId.compareTo(userBId) < 0 ? userBId : userAId;
 
-        return repository.findByUserA_UserIdAndUserB_UserId(userAId, userBId)
+        return repository.findByUserA_UserIdAndUserB_UserId(first, second)
                 .map(UserMatchMapper::toResponse);
     }
-
     @Override
     public void unmatch(UUID matchId) {
 
@@ -73,9 +73,11 @@ public class UserMatchServiceImpl implements UserMatchService {
     @Override
     public boolean hasActiveMatch(UUID userAId, UUID userBId) {
         log.debug("Checking if match exists");
-        return repository.existsByUserA_UserIdAndUserB_UserIdAndActiveTrue(userAId, userBId);
-    }
+        UUID first = userAId.compareTo(userBId) < 0 ? userAId : userBId;
+        UUID second = userAId.compareTo(userBId) < 0 ? userBId : userAId;
 
+        return repository.existsByUserA_UserIdAndUserB_UserIdAndActiveTrue(first, second);
+    }
     @Override
     public List<UserMatchResponse> getActiveMatches(UUID userId) {
         return repository.findActiveMatchesByUserId(userId)

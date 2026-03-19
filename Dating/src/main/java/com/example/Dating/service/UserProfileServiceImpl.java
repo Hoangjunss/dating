@@ -4,12 +4,14 @@ import com.example.Dating.dtos.request.UserProfileCreateRequest;
 import com.example.Dating.dtos.request.UserProfileUpdateRequest;
 import com.example.Dating.dtos.response.UserPreferenceResponse;
 import com.example.Dating.dtos.response.UserProfileResponse;
+import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserPreference;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserProfileRepository;
+import com.example.Dating.repository.UserRepository;
 import com.example.Dating.specification.UserProfileSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -40,29 +42,41 @@ import java.util.stream.Collectors;
 @Transactional
 public class UserProfileServiceImpl implements UserProfileService {
 
-    private final UserProfileRepository repository;
+    private final UserProfileRepository userProfileRepository;
+    private final UserRepository userRepository;
     private final UserPreferenceService userPreferenceService;
 
     /**
-     * Creates a new user profile.
-     * Business rule: displayName must be unique.
-     * 
-     * @param request User profile creation request
-     * @return Created user profile response
-     * @throws DuplicateResourceException if displayName already exists
+     * Create UserProfile (after registration).
+     * Flow:
+     * 1. Validate that userId exists in the users table
+     * 2. Check that User does not already have a profile (prevent creating twice)
+     * 3. Save the new UserProfile
+     * 4. Backlink: user.profile = userProfile → save User
      */
     @Override
     @Transactional
     public UserProfileResponse create(UserProfileCreateRequest request) {
-        log.info("Creating user profile with displayName: {}", request.getDisplayName());
+        log.info("Creating UserProfile for userId: {}", request.getUserId());
 
-        UserProfile entity = UserProfileMapper.toEntity(request);
-        repository.save(entity);
-        
-        log.info("Profile created successfully with userId: {}", entity.getUserId());
-        return UserProfileMapper.toResponse(entity);
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User not found with id: " + request.getUserId()));
+
+        if (user.getProfile() != null) {
+            throw new DuplicateResourceException(
+                    "UserProfile already exists for userId: " + request.getUserId());
+        }
+
+        UserProfile profile = UserProfileMapper.toEntity(request);
+
+        profile.setUser(user);
+        userProfileRepository.save(profile);
+
+        log.info("UserProfile saved with userId: {}", profile.getUserId());
+
+        return UserProfileMapper.toResponse(profile);
     }
-
     /**
      * Retrieves a single profile by userId.
      *
@@ -88,7 +102,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     public List<UserProfileResponse> getAll() {
         log.debug("Fetching all profiles");
         
-        return repository.findAll()
+        return userProfileRepository.findAll()
                 .stream()
                 .map(UserProfileMapper::toResponse)
                 .collect(Collectors.toList());
@@ -105,13 +119,13 @@ public class UserProfileServiceImpl implements UserProfileService {
     public Page<UserProfileResponse> getAllPaginated(UUID userId, Pageable pageable) {
 
         UserPreferenceResponse pref = userPreferenceService.get(userId);
-        UserProfile currentUser = repository.findById(userId)
+        UserProfile currentUser = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Specification<UserProfile> spec = UserProfileSpecification
                 .filter(userId, currentUser, pref);
 
-        return repository.findAll(spec, pageable)
+        return userProfileRepository.findAll(spec, pageable)
                 .map(UserProfileMapper::toResponse);
     }
 
@@ -132,7 +146,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         UserProfile entity = findById(userId);
 
         UserProfileMapper.updateEntity(entity, request);
-        repository.save(entity);
+        userProfileRepository.save(entity);
         
         log.info("Profile updated successfully for userId: {}", userId);
         return UserProfileMapper.toResponse(entity);
@@ -141,7 +155,8 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public UserProfile findEntityById(UUID id) {
         log.debug("Fetching profile for userId: {}", id);
-        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return userProfileRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
     /**
@@ -155,17 +170,17 @@ public class UserProfileServiceImpl implements UserProfileService {
     public void delete(UUID userId) {
         log.info("Deleting profile for userId: {}", userId);
         
-        if (!repository.existsById(userId)) {
+        if (!userProfileRepository.existsById(userId)) {
             log.warn("Profile not found for deletion, userId: {}", userId);
             throw new ResourceNotFoundException("Profile not found with userId: " + userId);
         }
-        
-        repository.deleteById(userId);
+
+        userProfileRepository.deleteById(userId);
         log.info("Profile deleted successfully for userId: {}", userId);
     }
 
     private UserProfile findById(UUID id) {
-        return repository.findById(id)
+        return userProfileRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Profile not found for update, userId: {}", id);
                     return new ResourceNotFoundException("Profile not found with userId: " + id);

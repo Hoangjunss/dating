@@ -15,7 +15,7 @@ import java.util.UUID;
 @Table(
         name = "user_matches",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"userAId", "userBId"})
+                @UniqueConstraint(columnNames = {"user_a_id", "user_b_id"})
         }
 )
 @Getter

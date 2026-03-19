@@ -16,10 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * REST Controller for User Profile Management.
- * Provides endpoints for CRUD operations on user profiles.
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/profiles")
@@ -29,95 +25,83 @@ public class UserProfileController {
     private final UserProfileService userProfileService;
 
     /**
-     * Creates a new user profile.
-     * 
-     * @param request User profile creation request
-     * @return Created user profile with 201 CREATED status
+     * POST /api/profiles
+     * Tạo profile sau khi đã register (bước 2).
+     * Body: { "userId": "uuid", "displayName": "...", "gender": "MALE|FEMALE|OTHER",
+     *         "birthday": "yyyy-MM-dd", ... }
+     * Response 201: UserProfileResponse
      */
     @PostMapping
     public ResponseEntity<UserProfileResponse> create(
             @Valid @RequestBody UserProfileCreateRequest request) {
-        log.info("POST /api/profiles - Creating user profile");
-        
+        log.info("POST /api/profiles - Creating profile for userId: {}", request.getUserId());
         UserProfileResponse response = userProfileService.create(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
-     * Retrieves a user profile by ID.
-     * 
-     * @param userId The user ID (UUID)
-     * @return User profile with 200 OK status
+     * GET /api/profiles/{userId}
+     * Lấy profile theo userId.
+     * Response 200: UserProfileResponse
      */
     @GetMapping("/{userId}")
     public ResponseEntity<UserProfileResponse> get(
             @PathVariable UUID userId) {
-        log.info("GET /api/profiles/{} - Fetching user profile", userId);
-        
+        log.info("GET /api/profiles/{} - Fetching profile", userId);
         UserProfileResponse response = userProfileService.get(userId);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Retrieves all user profiles (non-paginated).
-     * 
-     * @return List of all user profiles
+     * GET /api/profiles
+     * Lấy tất cả profiles (không phân trang).
+     * Response 200: List<UserProfileResponse>
      */
     @GetMapping
     public ResponseEntity<List<UserProfileResponse>> getAll() {
-        log.info("GET /api/profiles - Fetching all user profiles");
-        
+        log.info("GET /api/profiles - Fetching all profiles");
         List<UserProfileResponse> responses = userProfileService.getAll();
         return ResponseEntity.ok(responses);
     }
 
     /**
-     * Retrieves all user profiles with pagination support.
-     * 
-     * @param pageable Pagination parameters (page, size, sort)
-     * @return Paginated list of user profiles
+     * GET /api/profiles/{userId}/paginated?page=0&size=10
+     * Lấy profiles có phân trang, lọc theo preference của userId.
+     * Response 200: Page<UserProfileResponse>
      */
     @GetMapping("/{userId}/paginated")
     public ResponseEntity<Page<UserProfileResponse>> getAllPaginated(
             @PathVariable UUID userId,
             Pageable pageable) {
-        log.info("GET /api/profiles/paginated - Fetching paginated profiles: {}", pageable);
-        
+        log.info("GET /api/profiles/{}/paginated - page: {}, size: {}",
+                userId, pageable.getPageNumber(), pageable.getPageSize());
         Page<UserProfileResponse> responses = userProfileService.getAllPaginated(userId, pageable);
         return ResponseEntity.ok(responses);
     }
 
     /**
-     * Updates a user profile.
-     * Only non-null fields will be updated.
-     * 
-     * @param userId The user ID (UUID)
-     * @param request Profile update request
-     * @return Updated user profile with 200 OK status
+     * PUT /api/profiles/{userId}
+     * Cập nhật profile (partial update — chỉ field không null mới được ghi).
+     * Response 200: UserProfileResponse
      */
     @PutMapping("/{userId}")
     public ResponseEntity<UserProfileResponse> update(
             @PathVariable UUID userId,
             @Valid @RequestBody UserProfileUpdateRequest request) {
-        log.info("PUT /api/profiles/{} - Updating user profile", userId);
-        
+        log.info("PUT /api/profiles/{} - Updating profile", userId);
         UserProfileResponse response = userProfileService.update(userId, request);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Deletes a user profile.
-     * 
-     * @param userId The user ID (UUID)
-     * @return 204 NO_CONTENT status
+     * DELETE /api/profiles/{userId}
+     * Xóa profile.
+     * Response 204: No Content
      */
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> delete(
             @PathVariable UUID userId) {
-        log.info("DELETE /api/profiles/{} - Deleting user profile", userId);
-        
+        log.info("DELETE /api/profiles/{} - Deleting profile", userId);
         userProfileService.delete(userId);
         return ResponseEntity.noContent().build();
     }
