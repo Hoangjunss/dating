@@ -1,6 +1,7 @@
 package com.example.Dating.service;
 
 import com.example.Dating.dtos.response.UserMatchResponse;
+import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserMatch;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.mapper.UserMatchMapper;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 public class UserMatchServiceImpl implements UserMatchService {
 
     private final UserMatchRepository repository;
-    private final UserProfileService userProfileService;
+    private final AuthService userService;
 
     @Override
     public UserMatchResponse create(UUID userA, UUID userB) {
@@ -39,11 +40,11 @@ public class UserMatchServiceImpl implements UserMatchService {
                     throw new RuntimeException("Match already exists");
                 });
 
-        UserProfile userFrist = getUserProfile(first);
-        UserProfile userSecond = getUserProfile(second);
+        User userFirst = getUser(first);
+        User userSecond = getUser(second);
 
         UserMatch match = UserMatch.builder()
-                .userA(userFrist)
+                .userA(userFirst)
                 .userB(userSecond)
                 .build();
 
@@ -95,7 +96,7 @@ public class UserMatchServiceImpl implements UserMatchService {
     }
 
 
-    private UserProfile getUserProfile(UUID id) {
-        return  userProfileService.findEntityById(id);
+    private User getUser(UUID id) {
+        return  userService.findById(id);
     }
 }

@@ -8,10 +8,14 @@ import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.exception.ValidationException;
 import com.example.Dating.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -66,6 +70,11 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("Login successful. userId: {}", user.getId());
         return buildResponse(user);
+    }
+
+    @Override
+    public User findById(UUID id) {
+        return userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found"));
     }
 
     private AuthResponse buildResponse(User user) {

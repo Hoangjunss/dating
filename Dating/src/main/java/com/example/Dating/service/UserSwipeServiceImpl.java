@@ -4,6 +4,7 @@ import com.example.Dating.dtos.request.SwipeRequest;
 import com.example.Dating.dtos.response.ConversationResponse;
 import com.example.Dating.dtos.response.SwipeResultResponse;
 import com.example.Dating.dtos.response.UserMatchResponse;
+import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.entities.UserSwipe;
 import com.example.Dating.repository.UserSwipeRepository;
@@ -20,7 +21,7 @@ import java.util.UUID;
 public class UserSwipeServiceImpl implements UserSwipeService {
 
     private final UserSwipeRepository swipeRepository;
-    private final UserProfileService userProfileService;
+    private final AuthService userService;
     private final UserMatchService userMatchService;
     private final ConversationService conversationService;
 
@@ -39,8 +40,8 @@ public class UserSwipeServiceImpl implements UserSwipeService {
             throw new IllegalStateException("You have already swiped this user");
         }
 
-        UserProfile fromUser = userProfileService.findEntityById(fromId);
-        UserProfile toUser   = userProfileService.findEntityById(toId);
+        User fromUser = userService.findById(fromId);
+        User toUser   = userService.findById(toId);
 
         UserSwipe swipe = UserSwipe.builder()
                 .fromUser(fromUser)

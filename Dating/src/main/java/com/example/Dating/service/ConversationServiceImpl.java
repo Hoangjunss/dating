@@ -3,6 +3,7 @@ package com.example.Dating.service;
 import com.example.Dating.dtos.request.ConversationCreateRequest;
 import com.example.Dating.dtos.response.ConversationResponse;
 import com.example.Dating.entities.Conversation;
+import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.ConversationMapper;
@@ -22,7 +23,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     private final ConversationRepository repository;
     private final UserMatchService userMatchService;
-    private final UserProfileService userProfileService;
+    private final AuthService userService;
 
     @Override
     @Transactional
@@ -41,8 +42,8 @@ public class ConversationServiceImpl implements ConversationService {
             throw new IllegalStateException("Conversation can only be created between matched users");
         }
 
-        UserProfile userA = userProfileService.findEntityById(first);
-        UserProfile userB = userProfileService.findEntityById(second);
+        User userA = userService.findById(first);
+        User userB = userService.findById(second);
 
         Conversation conversation = Conversation.builder()
                 .userA(userA)
@@ -69,12 +70,12 @@ public class ConversationServiceImpl implements ConversationService {
             throw new IllegalStateException("Conversation can only be created between matched users");
         }
 
-        UserProfile u1 = userProfileService.findEntityById(first);
-        UserProfile u2 = userProfileService.findEntityById(second);
+        User userA = userService.findById(first);
+        User userB = userService.findById(second);
 
         Conversation conv = Conversation.builder()
-                .userA(u1)
-                .userB(u2)
+                .userA(userA)
+                .userB(userB)
                 .build();
 
         conv = repository.save(conv);

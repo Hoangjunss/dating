@@ -30,11 +30,11 @@ public class Conversation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_a_id")
-    private UserProfile userA;
+    private User userA;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_b_id")
-    private UserProfile userB;
+    private User userB;
 
     private Instant createdAt;
 
