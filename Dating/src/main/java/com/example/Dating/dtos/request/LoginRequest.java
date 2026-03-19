@@ -11,7 +11,7 @@ public class LoginRequest {
      * AuthServiceImpl automatically detects and queries appropriately.
      */
     @NotBlank(message = "Username or email cannot be blank")
-    private String identifier;
+    private String username;
 
     @NotBlank(message = "Password cannot be blank")
     private String password;

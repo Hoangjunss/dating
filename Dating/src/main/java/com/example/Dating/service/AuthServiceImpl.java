@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
-        String identifier = request.getIdentifier().trim();
+        String identifier = request.getUsername().trim();
         log.info("Login attempt - identifier: {}", identifier);
 
         User user = userRepository.findByUsernameOrEmail(identifier)

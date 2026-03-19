@@ -40,7 +40,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest request) {
-        log.info("POST /api/auth/login - identifier: {}", request.getIdentifier());
+        log.info("POST /api/auth/login - identifier: {}", request.getUsername());
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
