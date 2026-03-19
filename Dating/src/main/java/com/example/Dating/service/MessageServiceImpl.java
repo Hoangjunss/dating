@@ -2,10 +2,7 @@ package com.example.Dating.service;
 
 import com.example.Dating.dtos.request.MessageSendRequest;
 import com.example.Dating.dtos.response.MessageResponse;
-import com.example.Dating.entities.Conversation;
-import com.example.Dating.entities.Message;
-import com.example.Dating.entities.MessageDeletion;
-import com.example.Dating.entities.UserProfile;
+import com.example.Dating.entities.*;
 import com.example.Dating.events.MessageUnsendEvent;
 import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
@@ -35,7 +32,7 @@ public class MessageServiceImpl implements MessageService {
     private final MessageDeletionRepository deletionRepository;
     private final ConversationRepository    conversationRepository;
     private final UserMatchService          userMatchService;
-    private final UserProfileService        userProfileService;
+    private final AuthService        userService;
     private final ApplicationEventPublisher eventPublisher;
     private final UnsendPolicy              unsendPolicy;
 
@@ -43,10 +40,10 @@ public class MessageServiceImpl implements MessageService {
     @Transactional
     public MessageResponse send(MessageSendRequest request) {
         Conversation conversation = findConversationOrThrow(request.getConversationId());
-        UserProfile sender = userProfileService.findEntityById(request.getSenderId());
+        User sender = userService.findById(request.getSenderId());
 
-        validateMembership(conversation, sender.getUserId());
-        validateActiveMatch(conversation, sender.getUserId());
+        validateMembership(conversation, sender.getId());
+        validateActiveMatch(conversation, sender.getId());
 
         Message message = Message.builder()
                 .conversation(conversation)

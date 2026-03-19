@@ -37,9 +37,11 @@ public class Conversation {
     private User userB;
 
     private Instant createdAt;
+    private Instant lastActivityAt;
 
     @PrePersist
     void prePersist() {
         createdAt = Instant.now();
+        lastActivityAt=Instant.now();
     }
 }

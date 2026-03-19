@@ -9,8 +9,13 @@ import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.ConversationMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.ConversationRepository;
+import com.example.Dating.specification.ConversationSpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -52,6 +57,20 @@ public class ConversationServiceImpl implements ConversationService {
 
         repository.save(conversation);
         return ConversationMapper.toResponse(conversation);
+    }
+    @Override
+    public Page<ConversationResponse> getUserConversations(UUID userId, int page, int size) {
+        // 1. Tạo Pageable (Phân trang)
+        // Lưu ý: Sắp xếp đã được định nghĩa trong Specification hoặc bạn có thể
+        // định nghĩa ở đây nếu Specification chỉ làm nhiệm vụ lọc.
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 2. Lấy Specification lọc theo User và sắp xếp theo lastActivityAt
+        Specification<Conversation> spec = ConversationSpecification.findUserConversations(userId);
+
+        // 3. Thực thi truy vấn
+        return repository.findAll(spec, pageable)
+                .map(ConversationMapper::toResponse);
     }
 
     @Override
