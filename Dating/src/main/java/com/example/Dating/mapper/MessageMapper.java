@@ -20,7 +20,7 @@ public final class MessageMapper {
         return MessageResponse.builder()
                 .id(message.getId())
                 .conversationId(message.getConversation().getId())
-                .senderId(message.getSender().getId())
+                .senderId(message.getSender().getUserId())
                 // Content ẩn khi unsent — client dùng field unsent để hiện placeholder
                 .content(isUnsent ? null : message.getContent())
                 .seen(message.getSeen())

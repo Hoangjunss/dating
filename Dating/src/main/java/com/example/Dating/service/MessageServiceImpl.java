@@ -42,8 +42,8 @@ public class MessageServiceImpl implements MessageService {
         Conversation conversation = findConversationOrThrow(request.getConversationId());
         User sender = userService.findById(request.getSenderId());
 
-        validateMembership(conversation, sender.getId());
-        validateActiveMatch(conversation, sender.getId());
+        validateMembership(conversation, sender.getUserId());
+        validateActiveMatch(conversation, sender.getUserId());
 
         Message message = Message.builder()
                 .conversation(conversation)
@@ -139,24 +139,24 @@ public class MessageServiceImpl implements MessageService {
     }
 
     private void validateMembership(Conversation conv, UUID userId) {
-        boolean isMember = conv.getUserA().getId().equals(userId)
-                || conv.getUserB().getId().equals(userId);
+        boolean isMember = conv.getUserA().getUserId().equals(userId)
+                || conv.getUserB().getUserId().equals(userId);
         if (!isMember) {
             throw new ValidationException("User is not a member of this conversation");
         }
     }
 
     private void validateActiveMatch(Conversation conv, UUID senderId) {
-        UUID otherId = conv.getUserA().getId().equals(senderId)
-                ? conv.getUserB().getId()
-                : conv.getUserA().getId();
+        UUID otherId = conv.getUserA().getUserId().equals(senderId)
+                ? conv.getUserB().getUserId()
+                : conv.getUserA().getUserId();
         if (!userMatchService.hasActiveMatch(senderId, otherId)) {
             throw new ValidationException("You can only message active matches");
         }
     }
 
     private void validateSender(Message message, UUID requesterId) {
-        if (!message.getSender().getId().equals(requesterId)) {
+        if (!message.getSender().getUserId().equals(requesterId)) {
             throw new ValidationException("Only the original sender can perform this action");
         }
     }

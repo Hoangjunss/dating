@@ -44,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
-        log.info("User registered successfully. userId: {}", user.getId());
+        log.info("User registered successfully. userId: {}", user.getUserId());
 
         return buildResponse(user);
     }
@@ -62,13 +62,15 @@ public class AuthServiceImpl implements AuthService {
                     return new ResourceNotFoundException("Invalid username/email or password");
                 });
 
+        log.info("User attempt - identifier: {}, {}, {}", user.getEmail(), user.getPassword(), request.getPassword());
+
         // Plain text compare — đổi thành BCrypt khi add security
         if (!user.getPassword().equals(request.getPassword())) {
             log.warn("Login failed — wrong password for identifier: {}", identifier);
             throw new ValidationException("Invalid username/email or password");
         }
 
-        log.info("Login successful. userId: {}", user.getId());
+        log.info("Login successful. userId: {}", user.getUserId());
         return buildResponse(user);
     }
 
@@ -79,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
 
     private AuthResponse buildResponse(User user) {
         return AuthResponse.builder()
-                .userId(user.getId())
+                .userId(user.getUserId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 // hasProfile = true nếu đã tạo profile (bước 2), false nếu chưa
