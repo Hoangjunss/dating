@@ -7,16 +7,15 @@ import { Users } from "lucide-react";
 const Sidebar = () => {
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
 
-  const { onlineUsers } = useAuthStore();
+  const { onlineUsers,authUser } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  console.log("Dữ liệu authUser hiện tại:", authUser);
 
   useEffect(() => {
-    getUsers('4d349e04-24d8-11f1-bff0-00ffe8d195c5');
+    getUsers(authUser.userId);
   }, [getUsers]);
 
-  const filteredUsers = showOnlineOnly
-    ? (users || []).filter((user) => onlineUsers.includes(user._id))
-    : (users || []);
+  const filteredUsers = users;
 
   if (isUsersLoading) return <SidebarSkeleton />;
 
@@ -45,12 +44,12 @@ const Sidebar = () => {
       <div className="overflow-y-auto w-full py-3">
         {filteredUsers.map((user) => (
           <button
-            key={user._id}
+            key={user.userId}
             onClick={() => setSelectedUser(user)}
             className={`
               w-full p-3 flex items-center gap-3
               hover:bg-base-300 transition-colors
-              ${selectedUser?._id === user._id ? "bg-base-300 ring-1 ring-base-300" : ""}
+              ${selectedUser?.userId === user.userId ? "bg-base-300 ring-1 ring-base-300" : ""}
             `}
           >
             <div className="relative mx-auto lg:mx-0">

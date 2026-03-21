@@ -20,12 +20,23 @@ const ChatContainer = () => {
   const messageEndRef = useRef(null);
 
   useEffect(() => {
-    getMessages('4d3b9a16-24d8-11f1-bff0-00ffe8d195c6', '4d349e04-24d8-11f1-bff0-00ffe8d195c5');
+    console.log("--- Kiểm tra Dữ liệu Chat ---");
+    console.log("AuthUser (Người đang dùng):", authUser);
+    console.log("SelectedUser (Người đang nhắn tin cùng):", selectedUser);
+    
+    // Kiểm tra xem ID có bị undefined không trước khi gọi
+    if (selectedUser?.id && authUser?.userId) {
+      getMessages(selectedUser.id, authUser.userId);
+      subscribeToMessages();
+    } else {
+      console.warn("Cảnh báo: Thiếu userId của một trong hai bên!");
+    }
+    getMessages(selectedUser.id, authUser.userId);
 
     subscribeToMessages();
 
     return () => unsubscribeFromMessages();
-  }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+  }, [selectedUser.id, authUser.userId, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
     if (messageEndRef.current && messages) {
@@ -51,14 +62,14 @@ const ChatContainer = () => {
         {messages.map((message) => (
           <div
             key={message._id}
-            className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`}
+            className={`chat ${message.senderId === authUser.userId ? "chat-end" : "chat-start"}`}
             ref={messageEndRef}
           >
             <div className=" chat-image avatar">
               <div className="size-10 rounded-full border">
                 <img
                   src={
-                    message.senderId === authUser._id
+                    message.senderId === authUser.userId
                       ? authUser.profilePic || "/avatar.png"
                       : selectedUser.profilePic || "/avatar.png"
                   }
@@ -79,7 +90,7 @@ const ChatContainer = () => {
                   className="sm:max-w-[200px] rounded-md mb-2"
                 />
               )}
-              {message.text && <p>{message.text}</p>}
+              {message.content && <p>{message.content}</p>}
             </div>
           </div>
         ))}

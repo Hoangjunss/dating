@@ -6,8 +6,12 @@ import HomePage from './page/HomePage'
 import ProfilePage from './page/ProfilePage'
 import { Route, Routes } from 'react-router-dom'
 import { Toaster } from "react-hot-toast";
+import { useAuthStore } from './store/useAuthStore';
+import { useEffect } from 'react';
 
 const App = () => {
+  const { authUser, checkAuth } = useAuthStore();
+
   return (
     <div >
       <Navbar />
