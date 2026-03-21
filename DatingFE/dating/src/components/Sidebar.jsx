@@ -11,12 +11,12 @@ const Sidebar = () => {
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
   useEffect(() => {
-    getUsers();
+    getUsers('4d349e04-24d8-11f1-bff0-00ffe8d195c5');
   }, [getUsers]);
 
   const filteredUsers = showOnlineOnly
-    ? users.filter((user) => onlineUsers.includes(user._id))
-    : users;
+    ? (users || []).filter((user) => onlineUsers.includes(user._id))
+    : (users || []);
 
   if (isUsersLoading) return <SidebarSkeleton />;
 

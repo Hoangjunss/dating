@@ -20,7 +20,7 @@ const ChatContainer = () => {
   const messageEndRef = useRef(null);
 
   useEffect(() => {
-    getMessages(selectedUser._id);
+    getMessages('4d3b9a16-24d8-11f1-bff0-00ffe8d195c6', '4d349e04-24d8-11f1-bff0-00ffe8d195c5');
 
     subscribeToMessages();
 
