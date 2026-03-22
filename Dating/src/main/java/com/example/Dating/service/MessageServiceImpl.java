@@ -43,7 +43,7 @@ public class MessageServiceImpl implements MessageService {
         User sender = userService.findById(request.getSenderId());
 
         validateMembership(conversation, sender.getUserId());
-        validateActiveMatch(conversation, sender.getUserId());
+        //validateActiveMatch(conversation, sender.getUserId());
 
         Message message = Message.builder()
                 .conversation(conversation)
