@@ -37,8 +37,14 @@ export const useChatStore = create((set, get) => ({
   },
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
+    const { authUser } = useAuthStore.getState();
+    const payload = {
+    conversationId: selectedUser, // Lấy ID cuộc hội thoại
+    senderId: authUser.userId,                   // ID của chính bạn (người gửi)
+    content: messageData.content                // Nội dung tin nhắn
+  };
     try {
-      const res = await axiosInstance.post(`/messages/send/${selectedUser._id || selectedUser}`, messageData);
+      const res = await axiosInstance.post('/messages/send', payload);
       set({ messages: [...messages, res.data] });
     } catch (error) {
       toast.error(error.response.data.message);

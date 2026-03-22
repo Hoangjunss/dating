@@ -8,12 +8,19 @@ const HomePage = () => {
   const { selectedUser } = useChatStore();
 
   return (
-    <div className="h-screen bg-base-200">
-      <div className="flex items-center justify-center pt-20 px-4">
-        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl h-[calc(100vh-8rem)]">
-          <div className="flex h-full rounded-lg overflow-hidden">
+    // Đổi màu nền sang hồng cực dịu, thêm padding để tạo hiệu ứng Bento
+    <div className="min-h-screen bg-[#FFF5F7] pt-20 pb-6 px-4 md:px-6Selection:bg-rose-200">
+      <div className="max-w-[1700px] mx-auto h-[calc(100vh-8rem)]">
+        {/* Bố cục Flex, thêm gap và đổ bóng nhẹ */}
+        <div className="flex gap-5 h-full">
+          
+          {/* Sidebar - Bo góc lớn, đổ bóng, hiệu ứng kính mờ nhẹ */}
+          <div className="w-20 md:w-80 h-full flex-shrink-0 bg-white/60 backdrop-blur-xl rounded-[2.5rem] shadow-xl shadow-rose-100/50 border border-white/50 overflow-hidden transition-all duration-300">
             <Sidebar />
+          </div>
 
+          {/* Chat Panel - Bo góc lớn, đổ bóng đậm hơn để tạo chiều sâu */}
+          <div className="flex-1 h-full bg-white rounded-[2.5rem] shadow-2xl shadow-rose-100 border border-rose-50 overflow-hidden transition-all duration-300">
             {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
           </div>
         </div>
@@ -21,4 +28,5 @@ const HomePage = () => {
     </div>
   );
 };
+
 export default HomePage;

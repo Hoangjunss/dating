@@ -1,26 +1,44 @@
 const MessageSkeleton = () => {
-  // Create an array of 6 items for skeleton messages
-  const skeletonMessages = Array(6).fill(null);
+  // Tạo 6 tin nhắn giả lập
+  const skeletonMessages = Array(6).fill(0);
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      {skeletonMessages.map((_, idx) => (
-        <div key={idx} className={`chat ${idx % 2 === 0 ? "chat-start" : "chat-end"}`}>
-          <div className="chat-image avatar">
-            <div className="size-10 rounded-full">
-              <div className="skeleton w-full h-full rounded-full" />
-            </div>
+    <div className="space-y-8 h-full">
+      {skeletonMessages.map((_, idx) => {
+        const isMyMessageSkeleton = idx % 2 === 0; // Giả lập tin nhắn của tôi và người khác
+        
+        return (
+          <div
+            key={idx}
+            className={`flex ${isMyMessageSkeleton ? "justify-end" : "justify-start"} gap-3 items-end relative overflow-hidden`}
+          >
+             {/* Hiệu ứng chạy sáng */}
+             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent skew-x-12 animate-shine z-10"></div>
+             
+             {/* Avatar Skeleton */}
+             {!isMyMessageSkeleton && (
+               <div className="size-10 rounded-full bg-gray-100 z-0"></div>
+             )}
+             
+             {/* Bong bóng tin nhắn Skeleton */}
+             <div className={`
+                p-4 rounded-[1.5rem] h-20 w-[60%]
+                ${isMyMessageSkeleton 
+                  ? "bg-rose-100 rounded-br-lg" 
+                  : "bg-gray-100 rounded-bl-lg"
+                }
+             z-0`}>
+                <div className="h-6 bg-white/50 rounded-md w-full mb-3"></div>
+                <div className="h-4 bg-white/50 rounded-md w-3/4"></div>
+             </div>
+             
+             {/* Avatar của tôi Skeleton */}
+             {isMyMessageSkeleton && (
+               <div className="size-10 rounded-full bg-rose-200 z-0"></div>
+             )}
           </div>
-
-          <div className="chat-header mb-1">
-            <div className="skeleton h-4 w-16" />
-          </div>
-
-          <div className="chat-bubble bg-transparent p-0">
-            <div className="skeleton h-16 w-[200px]" />
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

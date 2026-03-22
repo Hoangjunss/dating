@@ -6,6 +6,7 @@ import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { useAuthStore } from "../store/useAuthStore";
 import { formatMessageTime } from "../lib/utils";
+import { BadgeCheck } from "lucide-react";
 
 const ChatContainer = () => {
   const {
@@ -20,23 +21,11 @@ const ChatContainer = () => {
   const messageEndRef = useRef(null);
 
   useEffect(() => {
-    console.log("--- Kiểm tra Dữ liệu Chat ---");
-    console.log("AuthUser (Người đang dùng):", authUser);
-    console.log("SelectedUser (Người đang nhắn tin cùng):", selectedUser);
-    
-    // Kiểm tra xem ID có bị undefined không trước khi gọi
-    if (selectedUser?.id && authUser?.userId) {
-      getMessages(selectedUser.id, authUser.userId);
-      subscribeToMessages();
-    } else {
-      console.warn("Cảnh báo: Thiếu userId của một trong hai bên!");
-    }
-    getMessages(selectedUser.id, authUser.userId);
-
+    getMessages(selectedUser,authUser.userId);
     subscribeToMessages();
-
     return () => unsubscribeFromMessages();
-  }, [selectedUser.id, authUser.userId, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+  }, [selectedUser, authUser.userId, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+  console.log("Messages in chat container:", selectedUser);
 
   useEffect(() => {
     if (messageEndRef.current && messages) {
@@ -46,54 +35,82 @@ const ChatContainer = () => {
 
   if (isMessagesLoading) {
     return (
-      <div className="flex-1 flex flex-col overflow-auto">
+      <div className="flex-1 flex flex-col overflow-auto bg-rose-50/20">
         <ChatHeader />
-        <MessageSkeleton />
+        <div className="flex-1 p-6 space-y-6">
+          <MessageSkeleton />
+        </div>
         <MessageInput />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col h-full bg-rose-50/20">
       <ChatHeader />
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message._id}
-            className={`chat ${message.senderId === authUser.userId ? "chat-end" : "chat-start"}`}
-            ref={messageEndRef}
-          >
-            <div className=" chat-image avatar">
-              <div className="size-10 rounded-full border">
+      {/* Khung tin nhắn - Nền hồng cực nhạt */}
+      <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 selection:bg-rose-200">
+        {messages.map((message) => {
+          const isMyMessage = message.senderId === authUser.userId;
+          
+          return (
+            <div
+              key={message.id}
+              className={`flex ${isMyMessage ? "justify-end" : "justify-start"} items-end gap-3`}
+            >
+              {/* Avatar người gửi (nếu không phải tin nhắn của tôi) */}
+              {!isMyMessage && (
                 <img
-                  src={
-                    message.senderId === authUser.userId
-                      ? authUser.profilePic || "/avatar.png"
-                      : selectedUser.profilePic || "/avatar.png"
-                  }
-                  alt="profile pic"
-                />
-              </div>
-            </div>
-            <div className="chat-header mb-1">
-              <time className="text-xs opacity-50 ml-1">
-                {formatMessageTime(message.createdAt)}
-              </time>
-            </div>
-            <div className="chat-bubble flex flex-col">
-              {message.image && (
-                <img
-                  src={message.image}
-                  alt="Attachment"
-                  className="sm:max-w-[200px] rounded-md mb-2"
+                  src={selectedUser.profilePic || "/avatar.png"}
+                  alt="Avatar"
+                  className="size-10 rounded-full object-cover border-2 border-white shadow-md flex-shrink-0"
                 />
               )}
-              {message.content && <p>{message.content}</p>}
+              
+              <div className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"} max-w-[70%] md:max-w-[60%]`}>
+                {/* Bong bóng tin nhắn */}
+                <div
+                  className={`
+                    p-4 rounded-[1.5rem] shadow-lg shadow-rose-100/50 relative group
+                    ${isMyMessage 
+                      ? "bg-gradient-to-br from-rose-500 to-rose-400 text-white rounded-br-lg" 
+                      : "bg-white text-rose-950 rounded-bl-lg border border-rose-100/50"
+                    }
+                  `}
+                >
+                  {/* Nội dung hình ảnh */}
+                  {message.image && (
+                    <img
+                      src={message.image}
+                      alt="Attachment"
+                      className="max-w-[250px] md:max-w-[300px] rounded-xl mb-3 border-4 border-white shadow-inner"
+                    />
+                  )}
+                  {/* Nội dung văn bản */}
+                  {message.content && <p className="text-sm md:text-base leading-relaxed font-medium">{message.content}</p>}
+                </div>
+
+                {/* Thời gian gửi tin nhắn - Chỉ hiện khi hover */}
+                <span className={`text-[10px] text-rose-300 font-medium mt-1.5 px-2 transition-opacity duration-300 opacity-0 group-hover:opacity-100 flex items-center gap-1`}>
+                  {formatMessageTime(message.createdAt)}
+                  {isMyMessage && <BadgeCheck size={12} className="text-rose-300" />}
+                </span>
+              </div>
+
+              {/* Avatar của tôi (nếu là tin nhắn của tôi) */}
+              {isMyMessage && (
+                <img
+                  src={authUser.profilePic || "/avatar.png"}
+                  alt="Avatar"
+                  className="size-10 rounded-full object-cover border-2 border-white shadow-md flex-shrink-0"
+                />
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
+        {/* Phần tử mốc để tự động cuộn */}
+        <div ref={messageEndRef} />
       </div>
 
       <MessageInput />
