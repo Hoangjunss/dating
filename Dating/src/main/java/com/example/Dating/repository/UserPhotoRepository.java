@@ -7,5 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserPhotoRepository extends JpaRepository<UserPhoto, UUID> {
-    List<UserPhoto> findByUserProfile_UserId(UUID userId);
+    UserPhoto findByUserProfile_Id(UUID userId);
+
+
 }

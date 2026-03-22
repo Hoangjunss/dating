@@ -37,7 +37,6 @@ public final class UserProfileMapper {
 
     public static UserProfile toEntity(UserProfileResponse resp) {
         return UserProfile.builder()
-                .userId(resp.getUserId())
                 .displayName(resp.getDisplayName())
                 .gender(resp.getGender())
                 .birthday(resp.getBirthday())
@@ -55,7 +54,7 @@ public final class UserProfileMapper {
      */
     public static UserProfileResponse toResponse(UserProfile e) {
         return UserProfileResponse.builder()
-                .userId(e.getUserId())
+                .id(e.getId())
                 .displayName(e.getDisplayName())
                 .gender(e.getGender())
                 .birthday(e.getBirthday())
@@ -65,6 +64,7 @@ public final class UserProfileMapper {
                 .education(e.getEducation())
                 .city(e.getCity())
                 .verified(e.getVerified())
+                .userId(e.getUser().getUserId())
                 .build();
     }
 
