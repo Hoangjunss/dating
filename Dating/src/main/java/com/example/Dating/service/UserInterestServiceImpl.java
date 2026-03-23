@@ -61,7 +61,6 @@ public class UserInterestServiceImpl implements UserInterestService {
      * Retrieves all interests for a user.
      */
     @Override
-    @Transactional(readOnly = true)
     public List<UserInterestResponse> getByUser(UUID userId) {
         log.debug("Fetching interests for userId: {}", userId);
         

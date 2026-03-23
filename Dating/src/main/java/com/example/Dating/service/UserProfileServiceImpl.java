@@ -9,7 +9,9 @@ import com.example.Dating.entities.UserPreference;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
+import com.example.Dating.mapper.InterestMapper;
 import com.example.Dating.mapper.UserProfileMapper;
+import com.example.Dating.repository.InterestRepository;
 import com.example.Dating.repository.UserPhotoRepository;
 import com.example.Dating.repository.UserProfileRepository;
 import com.example.Dating.repository.UserRepository;
@@ -49,7 +51,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserPreferenceService userPreferenceService;
     private final UserPhotoRepository userPhotoRepository;
     private final UserInterestService userInterestService;
-    private final InterestService interestService;
+    private final InterestRepository interestRepository;
 
 
     /**
@@ -84,7 +86,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         return UserProfileMapper.toResponse(profile);
     }
     @Override
-    @Transactional(readOnly = true)
     public UserProfileResponse get(UUID userId) {
         log.debug("Fetching profile for userId: {}", userId);
 
@@ -97,18 +98,14 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         // 3. Lấy danh sách Interest IDs từ bảng trung gian UserInterest
         List<UserInterestResponse> userInterests = userInterestService.getByUser(userId);
+        log.info(">>> DEBUG INTEREST: Tìm thấy {} bản ghi UserInterest cho user này", userInterests);
 
         // 4. Duyệt qua danh sách ID đó để lấy Name từ InterestService
         List<InterestResponse> interests = userInterests.stream()
-                .map(ui -> {
-                    // Gọi hàm get(UUID id) mà Dung vừa viết ở trên
-                    try {
-                        return interestService.get(ui.getInterestId());
-                    } catch (Exception e) {
-                        return null; // Phòng trường hợp interest bị xóa khỏi master data
-                    }
-                })
-                .filter(Objects::nonNull) // Loại bỏ các giá trị null
+                .map(ui -> interestRepository.findById(ui.getInterestId()) // Gọi trực tiếp Repo
+                        .map(InterestMapper::toResponse)
+                        .orElse(null)) // Nếu không thấy thì trả về null, không ném lỗi
+                .filter(Objects::nonNull)
                 .toList();
 
         response.setInterestResponses(interests);
