@@ -40,7 +40,7 @@ public class Message {
     @Column(nullable = false)
     private MessageType type;
 
-    @Column(nullable = false, length = 2000)
+    @Column(length = 2000)
     private String content;
 
     @Builder.Default
