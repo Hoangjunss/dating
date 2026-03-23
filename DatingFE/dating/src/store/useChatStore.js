@@ -50,6 +50,58 @@ export const useChatStore = create((set, get) => ({
       toast.error(error.response.data.message);
     }
   },
+  // useChatStore.js
+  // useChatStore.js — chỉ fix phần sendPhoto
+sendPhoto: async (file) => {
+    const { selectedUser } = get();
+    const { authUser } = useAuthStore.getState();
+
+    const blobUrl = URL.createObjectURL(file);
+    const tempId  = `temp-${Date.now()}`;
+
+    const tempMessage = {
+      id:             tempId,
+      senderId:       authUser.userId,
+      conversationId: selectedUser,
+      content:        null,
+      type:           "PHOTO",
+      photo:          blobUrl,
+      seen:           false,
+      status:         "uploading",
+      sentAt:         new Date().toISOString(),
+      unsent:         false,
+    };
+
+    set({ messages: [...get().messages, tempMessage] });
+
+    const formData = new FormData();
+    formData.append("conversationId", selectedUser);
+    formData.append("senderId", authUser.userId);
+    formData.append("photo", file);
+
+    try {
+      const res = await axiosInstance.post("/messages/photo", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      // ✅ REPLACE tempMessage bằng data thật — không add thêm
+      set({
+        messages: get().messages.map((msg) =>
+          msg.id === tempId ? { ...res.data, status: "sent" } : msg
+        ),
+      });
+    } catch (error) {
+      // ✅ Đánh dấu failed — không xóa, cho user biết lỗi
+      set({
+        messages: get().messages.map((msg) =>
+          msg.id === tempId ? { ...msg, status: "failed" } : msg
+        ),
+      });
+      toast.error(error.response?.data?.message || "Lỗi gửi ảnh");
+    } finally {
+      URL.revokeObjectURL(blobUrl); // giải phóng bộ nhớ
+    }
+  },
 
   subscribeToMessages: () => {
     const { selectedUser } = get();

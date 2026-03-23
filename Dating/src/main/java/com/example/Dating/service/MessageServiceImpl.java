@@ -79,7 +79,7 @@ public class MessageServiceImpl implements MessageService {
 
         messageRepository.save(message);
 
-        return null;
+        return MessageMapper.toResponse(message);
     }
 
     @Override
