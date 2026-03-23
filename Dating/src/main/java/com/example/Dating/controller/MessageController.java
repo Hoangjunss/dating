@@ -1,6 +1,7 @@
 package com.example.Dating.controller;
 
 import com.example.Dating.dtos.request.MessageSendRequest;
+import com.example.Dating.dtos.request.PhotoSendRequest;
 import com.example.Dating.dtos.response.MessageResponse;
 import com.example.Dating.service.MessageService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,16 @@ public class MessageController {
         log.info("POST /api/messages/send - conversationId: {}, senderId: {}",
                 request.getConversationId(), request.getSenderId());
         MessageResponse response = messageService.send(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/photo")
+    public ResponseEntity<MessageResponse> sendPhoto(
+            @ModelAttribute PhotoSendRequest request
+            ){
+        log.info("POST /api/messages/photo - conversationId: {}, senderId: {}",
+                request.getConversationId(), request.getSenderId());
+        MessageResponse response = messageService.sendPhoto(request);
         return ResponseEntity.ok(response);
     }
 
