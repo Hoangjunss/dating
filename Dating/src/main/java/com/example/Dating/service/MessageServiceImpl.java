@@ -1,9 +1,11 @@
 package com.example.Dating.service;
 
 import com.example.Dating.dtos.request.MessageSendRequest;
+import com.example.Dating.dtos.request.PhotoSendRequest;
 import com.example.Dating.dtos.response.MessageResponse;
 import com.example.Dating.entities.*;
 import com.example.Dating.events.MessageUnsendEvent;
+import com.example.Dating.events.PhotoUploadEvent;
 import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.exception.ValidationException;
@@ -32,6 +34,7 @@ public class MessageServiceImpl implements MessageService {
     private final MessageDeletionRepository deletionRepository;
     private final ConversationRepository    conversationRepository;
     private final UserMatchService          userMatchService;
+    private final MessagePhotoService       messagePhotoService;
     private final AuthService        userService;
     private final ApplicationEventPublisher eventPublisher;
     private final UnsendPolicy              unsendPolicy;
@@ -48,6 +51,7 @@ public class MessageServiceImpl implements MessageService {
         Message message = Message.builder()
                 .conversation(conversation)
                 .sender(sender)
+                .type(MessageType.TEXT)
                 .content(request.getContent())
                 .build();
 
@@ -55,6 +59,27 @@ public class MessageServiceImpl implements MessageService {
         log.info("Message saved - id: {}, conversationId: {}", message.getId(), conversation.getId());
 
         return MessageMapper.toResponse(message);
+    }
+
+    @Override
+    public MessageResponse sendPhoto(PhotoSendRequest request) {
+        Conversation conversation = findConversationOrThrow(request.getConversationId());
+        User sender = userService.findById(request.getSenderId());
+        validateMembership(conversation, sender.getUserId());
+
+        MessagePhotos photo = messagePhotoService.save(request.getPhoto());
+
+        Message message = Message.builder()
+                .conversation(conversation)
+                .sender(sender)
+                .type(MessageType.PHOTO)
+                .content(null)
+                .photo(photo)
+                .build();
+
+        messageRepository.save(message);
+
+        return null;
     }
 
     @Override

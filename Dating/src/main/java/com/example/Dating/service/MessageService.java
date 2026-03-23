@@ -1,6 +1,7 @@
 package com.example.Dating.service;
 
 import com.example.Dating.dtos.request.MessageSendRequest;
+import com.example.Dating.dtos.request.PhotoSendRequest;
 import com.example.Dating.dtos.response.MessageResponse;
 import com.example.Dating.mapper.MessageMapper;
 
@@ -10,6 +11,8 @@ import java.util.UUID;
 public interface MessageService {
 
     MessageResponse send(MessageSendRequest request);
+
+    MessageResponse sendPhoto(PhotoSendRequest request);
 
     List<MessageResponse> getMessages(UUID conversationId);
 

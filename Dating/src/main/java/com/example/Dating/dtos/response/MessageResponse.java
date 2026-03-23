@@ -1,5 +1,6 @@
 package com.example.Dating.dtos.response;
 
+import com.example.Dating.entities.MessageType;
 import lombok.*;
 
 import java.time.Instant;
@@ -17,6 +18,8 @@ public class MessageResponse {
     private UUID conversationId;
 
     private String content;
+    private MessageType type;
+    private String photo;
 
     private Boolean seen;
     private Instant sentAt;
