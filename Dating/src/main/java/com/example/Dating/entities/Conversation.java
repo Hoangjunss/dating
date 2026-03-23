@@ -14,7 +14,7 @@ import java.util.UUID;
 @Table(
         name = "conversations",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"userAId", "userBId"})
+                @UniqueConstraint(columnNames = {"user_a_id", "user_b_id"})
         }
 )
 @Getter
@@ -30,16 +30,18 @@ public class Conversation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_a_id")
-    private UserProfile userA;
+    private User userA;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_b_id")
-    private UserProfile userB;
+    private User userB;
 
     private Instant createdAt;
+    private Instant lastActivityAt;
 
     @PrePersist
     void prePersist() {
         createdAt = Instant.now();
+        lastActivityAt=Instant.now();
     }
 }

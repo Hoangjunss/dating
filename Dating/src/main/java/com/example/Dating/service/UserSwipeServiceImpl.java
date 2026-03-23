@@ -4,6 +4,7 @@ import com.example.Dating.dtos.request.SwipeRequest;
 import com.example.Dating.dtos.response.ConversationResponse;
 import com.example.Dating.dtos.response.SwipeResultResponse;
 import com.example.Dating.dtos.response.UserMatchResponse;
+import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.entities.UserSwipe;
 import com.example.Dating.repository.UserSwipeRepository;
@@ -20,13 +21,14 @@ import java.util.UUID;
 public class UserSwipeServiceImpl implements UserSwipeService {
 
     private final UserSwipeRepository swipeRepository;
-    private final UserProfileService userProfileService;
+    private final AuthService userService;
     private final UserMatchService userMatchService;
     private final ConversationService conversationService;
 
     @Transactional
     @Override
     public SwipeResultResponse swipe(SwipeRequest request) {
+        log.info("swipe request: {}", request);
         UUID fromId = request.getFromUserId();
         UUID toId   = request.getToUserId();
 
@@ -38,8 +40,8 @@ public class UserSwipeServiceImpl implements UserSwipeService {
             throw new IllegalStateException("You have already swiped this user");
         }
 
-        UserProfile fromUser = userProfileService.findEntityById(fromId);
-        UserProfile toUser   = userProfileService.findEntityById(toId);
+        User fromUser = userService.findById(fromId);
+        User toUser   = userService.findById(toId);
 
         UserSwipe swipe = UserSwipe.builder()
                 .fromUser(fromUser)
@@ -50,7 +52,7 @@ public class UserSwipeServiceImpl implements UserSwipeService {
         swipe = swipeRepository.saveAndFlush(swipe);
 
         boolean isMutualLike = request.isLiked() &&
-                swipeRepository.existsMutualLike(fromId, toId);
+                swipeRepository.existsByFromUser_UserIdAndToUser_UserIdAndIsLikedTrue(toId, fromId);
 
         UUID matchId = null;
         UUID conversationId = null;
@@ -79,6 +81,6 @@ public class UserSwipeServiceImpl implements UserSwipeService {
     @Override
     public boolean isMatch(UUID userA, UUID userB) {
     log.debug("Checking if UserA {} and UserB {}", userA, userB);
-        return swipeRepository.existsMutualLike(userA, userB);
+        return swipeRepository.existsByFromUser_UserIdAndToUser_UserIdAndIsLikedTrue(userA, userB);
     }
 }

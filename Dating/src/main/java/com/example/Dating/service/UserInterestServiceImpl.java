@@ -3,6 +3,7 @@ package com.example.Dating.service;
 import com.example.Dating.dtos.request.UserInterestRequest;
 import com.example.Dating.dtos.response.UserInterestResponse;
 import com.example.Dating.entities.Interest;
+import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserInterest;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.exception.DuplicateResourceException;
@@ -29,7 +30,7 @@ import java.util.UUID;
 public class UserInterestServiceImpl implements UserInterestService {
 
     private final UserInterestRepository repository;
-    private final UserProfileService userProfileService;
+    private final AuthService userService;
 
     /**
      * Adds an interest to a user.
@@ -46,9 +47,9 @@ public class UserInterestServiceImpl implements UserInterestService {
         }
 
         UserInterest entity = UserInterestMapper.toEntity(request);
-        UserProfile userProfile = userProfileService.findEntityById(request.getUserId());
+        User user = userService.findById(request.getUserId());
         Interest interest = Interest.builder().id(request.getInterestId()).build();
-        entity.setUserProfile(userProfile);
+        entity.setUser(user);
         entity.setInterest(interest);
         repository.save(entity);
 
@@ -60,7 +61,6 @@ public class UserInterestServiceImpl implements UserInterestService {
      * Retrieves all interests for a user.
      */
     @Override
-    @Transactional(readOnly = true)
     public List<UserInterestResponse> getByUser(UUID userId) {
         log.debug("Fetching interests for userId: {}", userId);
         

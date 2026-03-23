@@ -15,7 +15,7 @@ import java.util.UUID;
 @Table(
         name = "user_matches",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"userAId", "userBId"})
+                @UniqueConstraint(columnNames = {"user_a_id", "user_b_id"})
         }
 )
 @Getter
@@ -31,11 +31,11 @@ public class UserMatch {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_a_id", nullable = false)
-    private UserProfile userA;
+    private User userA;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_b_id", nullable = false)
-    private UserProfile userB;
+    private User userB;
 
     // allow unmatch / soft delete
     private Boolean active;

@@ -16,4 +16,5 @@ public class ConversationResponse {
     private UUID userAId;
     private UUID userBId;
     private Instant createdAt;
+    private Instant lastActivityAt;
 }

@@ -5,6 +5,7 @@ package com.example.Dating.dtos.response;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -13,6 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserProfileResponse {
+    private UUID id;
 
     private UUID userId;
     private String displayName;
@@ -24,4 +26,6 @@ public class UserProfileResponse {
     private String education;
     private String city;
     private Boolean verified;
+    private String image;
+    private List<InterestResponse> interestResponses;
 }

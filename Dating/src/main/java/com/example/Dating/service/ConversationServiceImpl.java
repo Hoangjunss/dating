@@ -3,13 +3,19 @@ package com.example.Dating.service;
 import com.example.Dating.dtos.request.ConversationCreateRequest;
 import com.example.Dating.dtos.response.ConversationResponse;
 import com.example.Dating.entities.Conversation;
+import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.ConversationMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.ConversationRepository;
+import com.example.Dating.specification.ConversationSpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +28,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     private final ConversationRepository repository;
     private final UserMatchService userMatchService;
-    private final UserProfileService userProfileService;
+    private final AuthService userService;
 
     @Override
     @Transactional
@@ -41,8 +47,8 @@ public class ConversationServiceImpl implements ConversationService {
             throw new IllegalStateException("Conversation can only be created between matched users");
         }
 
-        UserProfile userA = userProfileService.findEntityById(first);
-        UserProfile userB = userProfileService.findEntityById(second);
+        User userA = userService.findById(first);
+        User userB = userService.findById(second);
 
         Conversation conversation = Conversation.builder()
                 .userA(userA)
@@ -51,6 +57,20 @@ public class ConversationServiceImpl implements ConversationService {
 
         repository.save(conversation);
         return ConversationMapper.toResponse(conversation);
+    }
+    @Override
+    public Page<ConversationResponse> getUserConversations(UUID userId, int page, int size) {
+        // 1. Tạo Pageable (Phân trang)
+        // Lưu ý: Sắp xếp đã được định nghĩa trong Specification hoặc bạn có thể
+        // định nghĩa ở đây nếu Specification chỉ làm nhiệm vụ lọc.
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 2. Lấy Specification lọc theo User và sắp xếp theo lastActivityAt
+        Specification<Conversation> spec = ConversationSpecification.findUserConversations(userId);
+
+        // 3. Thực thi truy vấn
+        return repository.findAll(spec, pageable)
+                .map(ConversationMapper::toResponse);
     }
 
     @Override
@@ -69,12 +89,12 @@ public class ConversationServiceImpl implements ConversationService {
             throw new IllegalStateException("Conversation can only be created between matched users");
         }
 
-        UserProfile u1 = userProfileService.findEntityById(first);
-        UserProfile u2 = userProfileService.findEntityById(second);
+        User userA = userService.findById(first);
+        User userB = userService.findById(second);
 
         Conversation conv = Conversation.builder()
-                .userA(u1)
-                .userB(u2)
+                .userA(userA)
+                .userB(userB)
                 .build();
 
         conv = repository.save(conv);

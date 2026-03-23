@@ -63,14 +63,7 @@ public class UserPhotoController {
      * @param userId The user ID (UUID)
      * @return List of user's photos
      */
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserPhotoResponse>> getByUser(
-            @PathVariable UUID userId) {
-        log.info("GET /api/photos/user/{} - Fetching photos for user", userId);
-        
-        List<UserPhotoResponse> responses = userPhotoService.getByUser(userId);
-        return ResponseEntity.ok(responses);
-    }
+
 
     /**
      * Deletes a photo by ID.

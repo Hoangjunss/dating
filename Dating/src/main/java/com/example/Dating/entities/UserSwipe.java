@@ -17,7 +17,7 @@ import java.util.UUID;
 @Table(
         name = "user_swipes",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"fromUserId", "toUserId"})
+                @UniqueConstraint(columnNames = {"from_user_id", "to_user_id"})
         }
 )
 @Getter
@@ -34,12 +34,12 @@ public class UserSwipe {
     // who swipes
     @ManyToOne
     @JoinColumn(name = "from_user_id", nullable = false)
-    private UserProfile fromUser;
+    private User fromUser;
 
     // target user
     @ManyToOne
     @JoinColumn(name = "to_user_id", nullable = false)
-    private UserProfile toUser;
+    private User toUser;
 
     // true = like, false = pass
     private boolean isLiked;

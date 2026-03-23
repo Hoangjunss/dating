@@ -10,6 +10,8 @@ public final class ConversationMapper {
     public static ConversationResponse toResponse(Conversation e) {
         return ConversationResponse.builder()
                 .id(e.getId())
+                .userAId(e.getUserA().getUserId())
+                .userBId(e.getUserB().getUserId())
                 .createdAt(e.getCreatedAt())
                 .build();
     }
