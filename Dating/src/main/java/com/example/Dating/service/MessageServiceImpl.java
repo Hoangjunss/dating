@@ -5,7 +5,7 @@ import com.example.Dating.dtos.request.PhotoSendRequest;
 import com.example.Dating.dtos.response.MessageResponse;
 import com.example.Dating.entities.*;
 import com.example.Dating.events.MessageUnsendEvent;
-import com.example.Dating.events.PhotoUploadEvent;
+// import com.example.Dating.events.PhotoUploadEvent;
 import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.exception.ValidationException;
@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -58,6 +59,9 @@ public class MessageServiceImpl implements MessageService {
         messageRepository.save(message);
         log.info("Message saved - id: {}, conversationId: {}", message.getId(), conversation.getId());
 
+        conversation.setLastActivityAt(Instant.now());
+        conversationRepository.save(conversation);
+
         return MessageMapper.toResponse(message);
     }
 
@@ -78,6 +82,9 @@ public class MessageServiceImpl implements MessageService {
                 .build();
 
         messageRepository.save(message);
+
+        conversation.setLastActivityAt(Instant.now());
+        conversationRepository.save(conversation);
 
         return MessageMapper.toResponse(message);
     }
