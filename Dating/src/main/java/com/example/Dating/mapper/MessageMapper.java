@@ -22,7 +22,9 @@ public final class MessageMapper {
                 .conversationId(message.getConversation().getId())
                 .senderId(message.getSender().getUserId())
                 // Content ẩn khi unsent — client dùng field unsent để hiện placeholder
-                .content(isUnsent ? null : message.getContent())
+                .content(isUnsent && message.getContent()!=null ? null : message.getContent())
+                .type(message.getType())
+                .photo(message.getPhoto() != null ? message.getPhoto().getImageUrl() :  null)
                 .seen(message.getSeen())
                 .sentAt(message.getSentAt())
                 .unsent(isUnsent)

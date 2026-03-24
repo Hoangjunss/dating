@@ -41,7 +41,7 @@ public class UserPhotoServiceImpl implements UserPhotoService {
         
         UserPhoto entity = UserPhotoMapper.toEntity(request);
         if(request.getImage() != null && !request.getImage().isEmpty()){
-            Map<String, Object> imageUrl = cloudinaryService.uploadFile(request.getImage(), "product");
+            Map<String, Object> imageUrl = cloudinaryService.uploadFile(request.getImage(), "/user");
             entity.setUrl((String) imageUrl.get("url"));
         }else{
             entity.setUrl(null);

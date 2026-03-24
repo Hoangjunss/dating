@@ -17,4 +17,7 @@ public class ConversationResponse {
     private UUID userBId;
     private Instant createdAt;
     private Instant lastActivityAt;
+    private Integer countUnSeen;
+    private MessageResponse lastMessage;
+    private String nickName;
 }

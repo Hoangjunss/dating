@@ -110,9 +110,15 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public List<ConversationResponse> getUserConversations(UUID userId) {
+
+
         return repository.findByUserAUserIdOrUserBUserId(userId, userId)
                 .stream()
-                .map(ConversationMapper::toResponse)
+                .map(conversation -> {
+                    ConversationResponse conversationResponse = ConversationMapper.toResponse(conversation);
+                    conversationResponse.setNickName(conversation.nickName(userId));
+                    return conversationResponse;
+                })
                 .toList();
     }
 }
