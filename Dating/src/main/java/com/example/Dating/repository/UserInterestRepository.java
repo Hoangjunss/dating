@@ -11,7 +11,12 @@ public interface UserInterestRepository
 
     List<UserInterest> findAllByUserProfile_UserId(UUID userId);
 
-    boolean existsByUserProfile_UserIdAndInterest_Id(UUID userId, UUID interestId);
+    boolean existsByUser_UserIdAndInterest_Id(UUID userId, UUID interestId);
 
     void deleteByUserProfile_UserIdAndInterest_Id(UUID userId, UUID interestId);
+
+    List<UserInterest> findByUser_UserId(UUID userId);
+
+     //batch load interests for a pool of users
+    List<UserInterest> findByUser_UserIdIn(List<UUID> userIds);
 }
