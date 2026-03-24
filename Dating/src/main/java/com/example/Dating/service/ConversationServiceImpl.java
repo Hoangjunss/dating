@@ -75,7 +75,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     @Transactional
-    public ConversationResponse createOrGet(UUID user1, UUID user2) {
+    public ConversationResponse createOrGet(UUID user1, UUID user2, boolean skipMatchValidation) {
         UUID first  = user1.compareTo(user2) < 0 ? user1 : user2;
         UUID second = user1.compareTo(user2) < 0 ? user2 : user1;
 
@@ -83,10 +83,11 @@ public class ConversationServiceImpl implements ConversationService {
         if (existing.isPresent()) {
             return ConversationMapper.toResponse(existing.get());
         }
-
-        // Check match tồn tại trước khi tạo conversation
-        if (!userMatchService.hasActiveMatch(user1, user2)) {
-            throw new IllegalStateException("Conversation can only be created between matched users");
+        if (!skipMatchValidation &&
+                !userMatchService.hasActiveMatch(user1, user2)) {
+            throw new IllegalStateException(
+                    "Conversation can only be created between matched users"
+            );
         }
 
         User userA = userService.findById(first);

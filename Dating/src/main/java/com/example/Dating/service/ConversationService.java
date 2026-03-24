@@ -12,7 +12,7 @@ public interface ConversationService {
 
     ConversationResponse create(ConversationCreateRequest request);
 
-    ConversationResponse createOrGet(UUID user1, UUID user2);
+    ConversationResponse createOrGet(UUID user1, UUID user2, boolean skipMatchValidation);
 
     ConversationResponse findById(UUID id);
 
