@@ -5,7 +5,6 @@ import com.example.Dating.dtos.response.ConversationResponse;
 import com.example.Dating.dtos.response.SwipeResultResponse;
 import com.example.Dating.dtos.response.UserMatchResponse;
 import com.example.Dating.entities.User;
-import com.example.Dating.entities.UserProfile;
 import com.example.Dating.entities.UserSwipe;
 import com.example.Dating.repository.UserSwipeRepository;
 import jakarta.transaction.Transactional;
@@ -24,6 +23,7 @@ public class UserSwipeServiceImpl implements UserSwipeService {
     private final AuthService userService;
     private final UserMatchService userMatchService;
     private final ConversationService conversationService;
+    private final RecommendationService recommendationService;
 
     @Transactional
     @Override
@@ -51,6 +51,8 @@ public class UserSwipeServiceImpl implements UserSwipeService {
 
         swipe = swipeRepository.saveAndFlush(swipe);
 
+        recommendationService.processSwipeElo(fromId, toId, request.isLiked());
+
         boolean isMutualLike = request.isLiked() &&
                 swipeRepository.existsByFromUser_UserIdAndToUser_UserIdAndIsLikedTrue(toId, fromId);
 
@@ -61,7 +63,7 @@ public class UserSwipeServiceImpl implements UserSwipeService {
             UserMatchResponse matchResp = userMatchService.create(fromId, toId);
             matchId = matchResp.getId();
 
-            ConversationResponse convResp = conversationService.createOrGet(fromId, toId);
+            ConversationResponse convResp = conversationService.createOrGet(fromId, toId, true);
             conversationId = convResp.getId();
         }
 
