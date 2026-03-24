@@ -4,9 +4,11 @@ import com.example.Dating.dtos.request.LoginRequest;
 import com.example.Dating.dtos.request.RegisterRequest;
 import com.example.Dating.dtos.response.AuthResponse;
 import com.example.Dating.entities.User;
+import com.example.Dating.entities.UserEloScore;
 import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.exception.ValidationException;
+import com.example.Dating.repository.UserEloScoreRepository;
 import com.example.Dating.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final UserEloScoreRepository eloScoreRepository;
 
     @Override
     @Transactional
@@ -32,7 +35,6 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new DuplicateResourceException("Username '" + request.getUsername() + "' is already taken");
         }
-
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Email '" + request.getEmail() + "' is already registered");
         }
@@ -40,13 +42,27 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(request.getPassword()) // NOTE: nên hash password ở đây
                 .build();
 
-        userRepository.save(user);
-        log.info("User registered successfully. userId: {}", user.getUserId());
+        User savedUser = userRepository.save(user);
 
-        return buildResponse(user);
+        //seed Elo score mặc định ngay khi register
+        UserEloScore elo = UserEloScore.builder()
+                .userId(savedUser.getUserId())
+                .score(1400.0)
+                .totalSeen(0L)
+                .totalLikes(0L)
+                .build();
+        eloScoreRepository.save(elo);
+
+        log.info("User registered with userId: {}", savedUser.getUserId());
+
+        return AuthResponse.builder()
+                .userId(savedUser.getUserId())
+                .username(savedUser.getUsername())
+                .email(savedUser.getEmail())
+                .build();
     }
 
     // Login — accepts username or email in the 'identifier' field
