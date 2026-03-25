@@ -38,10 +38,13 @@ public class RecommendationSpecification {
 
             // 3. Gender preference
             if (StringUtils.hasText(pref.getGenderPreference())
-                    && !pref.getGenderPreference().equalsIgnoreCase("ANY")) {
+                    && !"ANY".equalsIgnoreCase(pref.getGenderPreference())) {
+
+                String preferredGender = pref.getGenderPreference().toUpperCase().trim();
+
                 predicates.add(cb.equal(
-                        cb.lower(root.get("gender")),
-                        pref.getGenderPreference().toLowerCase()
+                        cb.upper(root.get("gender")),
+                        preferredGender
                 ));
             }
 

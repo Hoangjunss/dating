@@ -58,6 +58,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         //fallback nếu user chưa set preference
         UserPreferenceResponse pref = loadPreferenceSafely(userId);
+        log.info("User preference is {}", pref);
 
         Set<UUID> myInterestIds = loadInterestIds(userId);
         Set<UUID> swipedIds = userSwipeRepository.findFromUserIdSet(userId);
@@ -66,6 +67,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         int poolSize = Math.max(200, pageable.getPageSize() * 20);
         List<UserProfile> pool = userProfileRepository.findAll(spec, PageRequest.of(0, poolSize)).getContent();
 
+        log.info("Pool size is {}", pool.size());
         log.debug("Hard-filter pool size={}", pool.size());
         if (pool.size() < 10) {
             log.warn("Low pool size, using fallback candidates");
