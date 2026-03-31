@@ -1,6 +1,7 @@
 package com.example.Dating.controller;
 
 import com.example.Dating.dtos.request.LoginRequest;
+import com.example.Dating.dtos.request.RefreshTokenRequest;
 import com.example.Dating.dtos.request.RegisterRequest;
 import com.example.Dating.dtos.response.AuthResponse;
 import com.example.Dating.service.AuthService;
@@ -42,6 +43,21 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request) {
         log.info("POST /api/auth/login - identifier: {}", request.getUsername());
         AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * POST /api/auth/refresh
+     * Body: { "refreshToken": "..." }
+     * Response 200: AuthResponse với access token mới
+     *
+     * Client gọi endpoint này khi access token hết hạn (HTTP 401 từ API).
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        log.info("POST /api/auth/refresh");
+        AuthResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(response);
     }
 }
