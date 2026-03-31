@@ -1,11 +1,12 @@
 package com.example.Dating.controller;
 
 import com.example.Dating.dtos.response.UserMatchResponse;
+import com.example.Dating.exception.ValidationException;
 import com.example.Dating.service.UserMatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,41 +21,26 @@ public class UserMatchController {
     private final UserMatchService userMatchService;
 
     /**
-     * POST /api/matches?userA={uuid}&userB={uuid}
-     * Tạo match thủ công (thường được gọi nội bộ bởi swipe logic).
-     * Response 201: UserMatchResponse
+     * GET /api/matches/me
+     * Lấy tất cả active matches của current user.
      */
-    @PostMapping
-    public ResponseEntity<UserMatchResponse> create(
-            @RequestParam UUID userA,
-            @RequestParam UUID userB) {
-        log.info("POST /api/matches - userA: {}, userB: {}", userA, userB);
-        UserMatchResponse response = userMatchService.create(userA, userB);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    /**
-     * GET /api/matches/{userId}
-     * Lấy tất cả active matches của một user.
-     * Response 200: List<UserMatchResponse>
-     */
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<UserMatchResponse>> getActiveMatches(
-            @PathVariable UUID userId) {
-        log.info("GET /api/matches/{} - Fetching active matches", userId);
+    @GetMapping("/me")
+    public ResponseEntity<List<UserMatchResponse>> getActiveMatches(Authentication auth) {
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("GET /api/matches/me - userId: {}", userId);
         List<UserMatchResponse> responses = userMatchService.getActiveMatches(userId);
         return ResponseEntity.ok(responses);
     }
 
     /**
-     * GET /api/matches/{userId}/all
-     * Lấy tất cả matches (kể cả đã unmatch) của một user.
-     * Response 200: List<UserMatchResponse>
+     * GET /api/matches/me/all
+     * Lấy tất cả matches (kể cả đã unmatch) của current user.
+     *
      */
-    @GetMapping("/{userId}/all")
-    public ResponseEntity<List<UserMatchResponse>> getAllMatches(
-            @PathVariable UUID userId) {
-        log.info("GET /api/matches/{}/all - Fetching all matches", userId);
+    @GetMapping("/me/all")
+    public ResponseEntity<List<UserMatchResponse>> getAllMatches(Authentication auth) {
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("GET /api/matches/me/all - userId: {}", userId);
         List<UserMatchResponse> responses = userMatchService.getAllMatches(userId);
         return ResponseEntity.ok(responses);
     }
@@ -62,13 +48,16 @@ public class UserMatchController {
     /**
      * DELETE /api/matches/{matchId}
      * Unmatch — đánh dấu match là inactive.
-     * Response 204: No Content
      */
     @DeleteMapping("/{matchId}")
     public ResponseEntity<Void> unmatch(
-            @PathVariable UUID matchId) {
-        log.info("DELETE /api/matches/{} - Unmatching", matchId);
-        userMatchService.unmatch(matchId);
+            @PathVariable UUID matchId,
+            Authentication auth) {
+
+        UUID requesterId = (UUID) auth.getPrincipal();
+        log.info("DELETE /api/matches/{} - requesterId: {}", matchId, requesterId);
+
+        userMatchService.unmatch(matchId, requesterId);  // Truyền requesterId để validate ownership
         return ResponseEntity.noContent().build();
     }
 }

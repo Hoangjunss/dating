@@ -13,7 +13,7 @@ public interface UserMatchService {
 
     Optional<UserMatchResponse> getMatchBetween(UUID userAId, UUID userBId);
 
-    void unmatch(UUID matchId);
+    void unmatch(UUID matchId, UUID requesterId);
 
     boolean hasActiveMatch(UUID userAId,  UUID userBId);
 
