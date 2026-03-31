@@ -20,4 +20,8 @@ public class AuthResponse {
      * false = UserProfile does not exist → client navigates to the profile creation screen
      */
     private Boolean hasProfile;
+
+    private String accessToken;
+
+    private String refreshToken;
 }
