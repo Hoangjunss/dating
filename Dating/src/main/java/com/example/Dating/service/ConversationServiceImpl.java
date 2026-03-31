@@ -4,10 +4,9 @@ import com.example.Dating.dtos.request.ConversationCreateRequest;
 import com.example.Dating.dtos.response.ConversationResponse;
 import com.example.Dating.entities.Conversation;
 import com.example.Dating.entities.User;
-import com.example.Dating.entities.UserProfile;
 import com.example.Dating.exception.ResourceNotFoundException;
+import com.example.Dating.exception.ValidationException;
 import com.example.Dating.mapper.ConversationMapper;
-import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.ConversationRepository;
 import com.example.Dating.specification.ConversationSpecification;
 import jakarta.transaction.Transactional;
@@ -103,11 +102,27 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
+    public ConversationResponse findById(UUID id, UUID requesterId) {
+
+        Conversation conv = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No conversation found with id: " + id));
+
+        boolean isMember = conv.getUserA().getUserId().equals(requesterId)
+                || conv.getUserB().getUserId().equals(requesterId);
+        if (!isMember) {
+            throw new ValidationException("You are not a member of this conversation");
+        }
+
+        return ConversationMapper.toResponse(conv);
+    }
+
+    @Override
     public ConversationResponse findById(UUID id) {
         return repository.findById(id)
                 .map(ConversationMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("No conversation found with id: " + id));
     }
+
 
     @Override
     public List<ConversationResponse> getUserConversations(UUID userId) {

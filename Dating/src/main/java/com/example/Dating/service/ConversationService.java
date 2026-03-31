@@ -14,6 +14,8 @@ public interface ConversationService {
 
     ConversationResponse createOrGet(UUID user1, UUID user2, boolean skipMatchValidation);
 
+    ConversationResponse findById(UUID id, UUID requesterId);
+
     ConversationResponse findById(UUID id);
 
     List<ConversationResponse> getUserConversations(UUID userId);
