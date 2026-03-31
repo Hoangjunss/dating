@@ -26,5 +26,5 @@ public interface UserPhotoService {
     /**
      * Deletes a photo by ID.
      */
-    void delete(UUID id);
+    void delete(UUID id,UUID requesterId);
 }
