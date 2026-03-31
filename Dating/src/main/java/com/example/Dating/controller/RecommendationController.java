@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -29,6 +30,7 @@ public class RecommendationController {
 
     /**
      * Returns a page of recommended user profiles.
+     * GET /api/recommendations/me?page=0&size=10
      *
      * Query params:
      *  userId  — required, UUID of the requesting user
@@ -37,22 +39,16 @@ public class RecommendationController {
      *
      * Response: Page<CandidateResponse>
      */
-    @GetMapping
-    public ResponseEntity<Page<CandidateResponse>> getRecommendations(
-            @RequestParam UUID userId,
-            @RequestParam(defaultValue = "0")  int page,
-            // Giữ nguyên = 0, vì nếu tăng số thì sẽ hiểu là bỏ qua 10 đối tượng tốt nhất lần gọi API đó.
-            // Vì hiện tại mỗi lần kêu API là mỗi lần chạy lại service recommendation, thì sẽ điểm lại
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        // Cap page size to prevent abuse
-        int cappedSize = Math.min(size, 50);
+    @GetMapping("/me")
+    public ResponseEntity<Page<CandidateResponse>> getCandidates(
+            Pageable pageable,
+            Authentication auth) {
 
-        log.info("GET /api/recommendations - userId={}, page={}, size={}", userId, page, cappedSize);
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("GET /api/recommendations/me - userId: {}, page: {}, size: {}",
+                userId, pageable.getPageNumber(), pageable.getPageSize());
 
-        Pageable pageable = PageRequest.of(page, cappedSize);
-        Page<CandidateResponse> result = recommendationService.getCandidates(userId, pageable);
-
-        return ResponseEntity.ok(result);
+        Page<CandidateResponse> response = recommendationService.getCandidates(userId, pageable);
+        return ResponseEntity.ok(response);
     }
 }

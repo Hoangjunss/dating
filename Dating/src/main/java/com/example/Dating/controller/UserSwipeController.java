@@ -6,6 +6,7 @@ import com.example.Dating.service.UserSwipeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -20,32 +21,35 @@ public class UserSwipeController {
 
     /**
      * POST /api/swipes
-     * Thực hiện swipe (like hoặc pass).
-     * Nếu cả 2 user đều like nhau → tạo match + conversation tự động.
-     * Body: { "fromUserId": "uuid", "toUserId": "uuid", "isLiked": true|false }
-     * Response 200: SwipeResultResponse
-     *   { "id": "uuid", "isLiked": true, "isMutualLike": true,
-     *     "matchId": "uuid|null", "conversationId": "uuid|null" }
+     * Body: { "toUserId": "uuid", "isLiked": true|false }
      */
     @PostMapping
     public ResponseEntity<SwipeResultResponse> swipe(
-            @RequestBody SwipeRequest request) {
-        log.info("POST /api/swipes - from: {}, to: {}, liked: {}",
-                request.getFromUserId(), request.getToUserId(), request.isLiked());
+            @RequestBody SwipeRequest request,
+            Authentication auth) {
+
+        UUID fromUserId = (UUID) auth.getPrincipal();
+        request.setFromUserId(fromUserId);   // Override — không tin client
+
+        log.info("POST /api/swipes - fromUserId: {}, toUserId: {}, liked: {}",
+                fromUserId, request.getToUserId(), request.isLiked());
+
         SwipeResultResponse response = userSwipeService.swipe(request);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * GET /api/swipes/match?userA={uuid}&userB={uuid}
-     * Kiểm tra 2 user có match với nhau không.
-     * Response 200: true | false
+     * GET /api/swipes/match?userB={uuid}
+     * Kiểm tra current user có match với userB không.
      */
     @GetMapping("/match")
     public ResponseEntity<Boolean> isMatch(
-            @RequestParam UUID userA,
-            @RequestParam UUID userB) {
+            @RequestParam UUID userB,
+            Authentication auth) {
+
+        UUID userA = (UUID) auth.getPrincipal();
         log.info("GET /api/swipes/match - userA: {}, userB: {}", userA, userB);
+
         boolean result = userSwipeService.isMatch(userA, userB);
         return ResponseEntity.ok(result);
     }

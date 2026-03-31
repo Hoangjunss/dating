@@ -6,16 +6,12 @@ import com.example.Dating.service.UserPreferenceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * REST Controller for User Preference Management.
- * Provides endpoints for managing user search and matching preferences.
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/preferences")
@@ -25,50 +21,42 @@ public class UserPreferenceController {
     private final UserPreferenceService userPreferenceService;
 
     /**
-     * Creates or updates user preferences (upsert operation).
-     * 
-     * @param userId The user ID (UUID)
-     * @param request Preference request
-     * @return User preference response with 201 CREATED or 200 OK status
+     * PUT /api/preferences/me
+     * Tạo hoặc cập nhật preference của current user.
      */
-    @PutMapping("/{userId}")
+    @PutMapping("/me")
     public ResponseEntity<UserPreferenceResponse> save(
-            @PathVariable UUID userId,
-            @Valid @RequestBody UserPreferenceRequest request) {
-        log.info("PUT /api/preferences/{} - Saving preferences", userId);
-        
+            @Valid @RequestBody UserPreferenceRequest request,
+            Authentication auth) {
+
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("PUT /api/preferences/me - userId: {}", userId);
+
         UserPreferenceResponse response = userPreferenceService.save(userId, request);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
+        return ResponseEntity.ok(response);
     }
 
     /**
-     * Retrieves user preferences by userId.
-     * 
-     * @param userId The user ID (UUID)
-     * @return User preference response with 200 OK status
+     * GET /api/preferences/me
+     * Lấy preference của current user.
      */
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserPreferenceResponse> get(
-            @PathVariable UUID userId) {
-        log.info("GET /api/preferences/{} - Fetching preferences", userId);
-        
+    @GetMapping("/me")
+    public ResponseEntity<UserPreferenceResponse> get(Authentication auth) {
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("GET /api/preferences/me - userId: {}", userId);
+
         UserPreferenceResponse response = userPreferenceService.get(userId);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Deletes user preferences.
-     * 
-     * @param userId The user ID (UUID)
-     * @return 204 NO_CONTENT status
+     * DELETE /api/preferences/me
      */
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> delete(
-            @PathVariable UUID userId) {
-        log.info("DELETE /api/preferences/{} - Deleting preferences", userId);
-        
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> delete(Authentication auth) {
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("DELETE /api/preferences/me - userId: {}", userId);
+
         userPreferenceService.delete(userId);
         return ResponseEntity.noContent().build();
     }
