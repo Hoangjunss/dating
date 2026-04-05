@@ -5,6 +5,7 @@ import com.example.Dating.dtos.response.UserPhotoResponse;
 import com.example.Dating.entities.UserPhoto;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.exception.ResourceNotFoundException;
+import com.example.Dating.exception.ValidationException;
 import com.example.Dating.mapper.UserPhotoMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserPhotoRepository;
@@ -88,12 +89,15 @@ public class UserPhotoServiceImpl implements UserPhotoService {
      */
     @Override
     @Transactional
-    public void delete(UUID id) {
+    public void delete(UUID id, UUID requesterId) {
         log.info("Deleting photo with id: {}", id);
-        
-        if (!repository.existsById(id)) {
-            log.warn("Photo not found for deletion with id: {}", id);
-            throw new ResourceNotFoundException("Photo not found with id: " + id);
+
+        UserPhoto photo = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Photo not found: " + id));
+
+
+        if (!photo.getUserProfile().getUserId().equals(requesterId)) {
+            throw new ValidationException("You can only delete your own photos");
         }
         
         repository.deleteById(id);

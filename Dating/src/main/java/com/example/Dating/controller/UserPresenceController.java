@@ -1,18 +1,16 @@
 package com.example.Dating.controller;
 
 import com.example.Dating.dtos.response.UserPresenceResponse;
+import com.example.Dating.exception.ValidationException;
 import com.example.Dating.service.UserPresenceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * REST Controller for User Presence Management.
- * Provides endpoints for managing user online/offline status.
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/presence")
@@ -22,61 +20,46 @@ public class UserPresenceController {
     private final UserPresenceService userPresenceService;
 
     /**
-     * Sets a user's presence to online.
-     * 
-     * @param userId The user ID (UUID)
-     * @return 200 OK status
+     * POST /api/presence/me/online
+     * User chỉ có thể set online/offline cho chính mình
      */
-    @PostMapping("/{userId}/online")
-    public ResponseEntity<Void> setOnline(
-            @PathVariable UUID userId) {
-        log.info("POST /api/presence/{}/online - Setting user online", userId);
-        
+    @PostMapping("/me/online")
+    public ResponseEntity<Void> setOnline(Authentication auth) {
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("POST /api/presence/me/online - userId: {}", userId);
         userPresenceService.setOnline(userId);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * Sets a user's presence to offline.
-     * 
-     * @param userId The user ID (UUID)
-     * @return 200 OK status
+     * POST /api/presence/me/offline
      */
-    @PostMapping("/{userId}/offline")
-    public ResponseEntity<Void> setOffline(
-            @PathVariable UUID userId) {
-        log.info("POST /api/presence/{}/offline - Setting user offline", userId);
-        
+    @PostMapping("/me/offline")
+    public ResponseEntity<Void> setOffline(Authentication auth) {
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("POST /api/presence/me/offline - userId: {}", userId);
         userPresenceService.setOffline(userId);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * Retrieves user presence status.
-     * 
-     * @param userId The user ID (UUID)
-     * @return User presence response with 200 OK status
+     * GET /api/presence/{userId}
+     * Lấy trạng thái online của bất kỳ user nào (đã authenticated).
      */
     @GetMapping("/{userId}")
-    public ResponseEntity<UserPresenceResponse> get(
-            @PathVariable UUID userId) {
-        log.info("GET /api/presence/{} - Fetching presence status", userId);
-        
+    public ResponseEntity<UserPresenceResponse> get(@PathVariable UUID userId) {
+        log.info("GET /api/presence/{} - Fetching presence", userId);
         UserPresenceResponse response = userPresenceService.get(userId);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Deletes user presence data.
-     * 
-     * @param userId The user ID (UUID)
-     * @return 204 NO_CONTENT status
+     * DELETE /api/presence/me
      */
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> delete(
-            @PathVariable UUID userId) {
-        log.info("DELETE /api/presence/{} - Deleting presence", userId);
-        
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> delete(Authentication auth) {
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("DELETE /api/presence/me - userId: {}", userId);
         userPresenceService.delete(userId);
         return ResponseEntity.noContent().build();
     }

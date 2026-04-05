@@ -41,7 +41,7 @@ public class UserInterestServiceImpl implements UserInterestService {
     public UserInterestResponse create(UserInterestRequest request) {
         log.info("Adding interest {} to user {}", request.getInterestId(), request.getUserId());
 
-        if (repository.existsByUserProfile_UserIdAndInterest_Id(request.getUserId(), request.getInterestId())) {
+        if (repository.existsByUser_UserIdAndInterest_Id(request.getUserId(), request.getInterestId())) {
             log.warn("Interest already added for userId: {}, interestId: {}", request.getUserId(), request.getInterestId());
             throw new DuplicateResourceException("This interest is already added for this user");
         }
@@ -78,7 +78,7 @@ public class UserInterestServiceImpl implements UserInterestService {
     public void delete(UUID userId, UUID interestId) {
         log.info("Removing interest {} from user {}", interestId, userId);
         
-        if (!repository.existsByUserProfile_UserIdAndInterest_Id(userId, interestId)) {
+        if (!repository.existsByUser_UserIdAndInterest_Id(userId, interestId)) {
             log.warn("Interest not found for userId: {}, interestId: {}", userId, interestId);
             throw new ResourceNotFoundException("Interest not found for this user");
         }

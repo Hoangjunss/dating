@@ -9,8 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
 import java.util.UUID;
 
 @Slf4j
@@ -25,11 +27,21 @@ public class MessageWsController {
      * Client gửi tin nhắn qua WebSocket.
      * Destination : /app/chat.send
      * Broadcast   : /topic/conversation.{conversationId}
-     * Payload: { "conversationId": "uuid", "senderId": "uuid", "content": "..." }
+     *
+     * senderId lấy từ Principal (JWT đã xác thực trong STOMP CONNECT)
+     * Client không thể giả mạo senderId
+     *
+     * Payload: { "conversationId": "uuid", "content": "..." }
      */
     @MessageMapping("/chat.send")
-    public void send(@Payload MessageSendRequest request) {
-        log.debug("WS /chat.send - conversationId: {}", request.getConversationId());
+    public void send(@Payload MessageSendRequest request, Principal principal) {
+        // Principal.getName() = userId.toString() (set trong WebSocketSecurityConfig)
+        UUID senderId = UUID.fromString(principal.getName());
+        request.setSenderId(senderId);   // Override — không tin client
+
+        log.debug("WS /chat.send - conversationId: {}, senderId: {}",
+                request.getConversationId(), senderId);
+
         MessageResponse saved = messageService.send(request);
         messagingTemplate.convertAndSend(
                 "/topic/conversation." + request.getConversationId(), saved);
@@ -38,20 +50,24 @@ public class MessageWsController {
     /**
      * Client yêu cầu unsend qua WebSocket.
      * Destination : /app/chat.unsend
-     * Payload: { "messageId": "uuid", "conversationId": "uuid", "requesterId": "uuid" }
-     * Broadcast được xử lý bởi MessageEventListener sau khi service publish event.
+     *
+     * requesterId lấy từ Principal
+     *
+     * Payload: { "messageId": "uuid", "conversationId": "uuid" }
      */
     @MessageMapping("/chat.unsend")
-    public void unsend(@Payload UnsendRequest request) {
+    public void unsend(@Payload UnsendRequest request, Principal principal) {
+        UUID requesterId = UUID.fromString(principal.getName());
+
         log.debug("WS /chat.unsend - messageId: {}, requesterId: {}",
-                request.getMessageId(), request.getRequesterId());
-        messageService.unsendForEveryone(request.getMessageId(), request.getRequesterId());
+                request.getMessageId(), requesterId);
+
+        messageService.unsendForEveryone(request.getMessageId(), requesterId);
     }
 
     @Data
     public static class UnsendRequest {
         private UUID messageId;
         private UUID conversationId;
-        private UUID requesterId;
     }
 }

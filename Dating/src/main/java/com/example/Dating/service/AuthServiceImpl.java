@@ -1,16 +1,21 @@
 package com.example.Dating.service;
 
 import com.example.Dating.dtos.request.LoginRequest;
+import com.example.Dating.dtos.request.RefreshTokenRequest;
 import com.example.Dating.dtos.request.RegisterRequest;
 import com.example.Dating.dtos.response.AuthResponse;
 import com.example.Dating.entities.User;
+import com.example.Dating.entities.UserEloScore;
 import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.exception.ValidationException;
+import com.example.Dating.repository.UserEloScoreRepository;
 import com.example.Dating.repository.UserRepository;
+import com.example.Dating.security.JwtTokenProvider;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +28,9 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final UserEloScoreRepository eloScoreRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider tokenProvider;
 
     @Override
     @Transactional
@@ -32,7 +40,6 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new DuplicateResourceException("Username '" + request.getUsername() + "' is already taken");
         }
-
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Email '" + request.getEmail() + "' is already registered");
         }
@@ -40,13 +47,33 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
-        userRepository.save(user);
-        log.info("User registered successfully. userId: {}", user.getUserId());
+        User savedUser = userRepository.save(user);
 
-        return buildResponse(user);
+        //seed Elo score mặc định ngay khi register
+        UserEloScore elo = UserEloScore.builder()
+                .userId(savedUser.getUserId())
+                .score(1400.0)
+                .totalSeen(0L)
+                .totalLikes(0L)
+                .build();
+        eloScoreRepository.save(elo);
+
+        log.info("User registered with userId: {}", savedUser.getUserId());
+
+        String accessToken  = tokenProvider.generateAccessToken(savedUser.getUserId(), savedUser.getUsername());
+        String refreshToken = tokenProvider.generateRefreshToken(savedUser.getUserId());
+
+        return AuthResponse.builder()
+                .userId(savedUser.getUserId())
+                .username(savedUser.getUsername())
+                .email(savedUser.getEmail())
+                .hasProfile(false)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     // Login — accepts username or email in the 'identifier' field
@@ -59,33 +86,60 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsernameOrEmail(identifier)
                 .orElseThrow(() -> {
                     log.warn("Login failed — not found: {}", identifier);
-                    return new ResourceNotFoundException("Invalid username/email or password");
+                    return new ValidationException("Invalid username/email or password");
                 });
 
         log.info("User attempt - identifier: {}, {}, {}", user.getEmail(), user.getPassword(), request.getPassword());
 
         // Plain text compare — đổi thành BCrypt khi add security
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.warn("Login failed — wrong password for identifier: {}", identifier);
             throw new ValidationException("Invalid username/email or password");
         }
 
         log.info("Login successful. userId: {}", user.getUserId());
-        return buildResponse(user);
+        String accessToken  = tokenProvider.generateAccessToken(user.getUserId(), user.getUsername());
+        String refreshToken = tokenProvider.generateRefreshToken(user.getUserId());
+
+        return AuthResponse.builder()
+                .userId(user.getUserId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .hasProfile(user.getProfile() != null)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    @Override
+    public AuthResponse refreshToken(RefreshTokenRequest request) {
+        String token = request.getRefreshToken();
+
+        if (!tokenProvider.validateToken(token) || !tokenProvider.isRefreshToken(token)) {
+            throw new ValidationException("Invalid or expired refresh token");
+        }
+
+        UUID userId = tokenProvider.getUserIdFromToken(token);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + " not found"));
+
+        String newAccessToken  = tokenProvider.generateAccessToken(user.getUserId(), user.getUsername());
+        String newRefreshToken = tokenProvider.generateRefreshToken(user.getUserId());
+
+        log.info("Token refreshed for userId: {}", userId);
+
+        return AuthResponse.builder()
+                .userId(user.getUserId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .hasProfile(user.getProfile() != null)
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
     }
 
     @Override
     public User findById(UUID id) {
         return userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found"));
-    }
-
-    private AuthResponse buildResponse(User user) {
-        return AuthResponse.builder()
-                .userId(user.getUserId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                // hasProfile = true nếu đã tạo profile (bước 2), false nếu chưa
-                .hasProfile(user.getProfile() != null)
-                .build();
     }
 }

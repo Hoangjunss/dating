@@ -2,21 +2,19 @@ package com.example.Dating.controller;
 
 import com.example.Dating.dtos.request.UserPhotoCreateRequest;
 import com.example.Dating.dtos.response.UserPhotoResponse;
+import com.example.Dating.exception.ValidationException;
 import com.example.Dating.service.UserPhotoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
-/**
- * REST Controller for User Photo Management.
- * Provides endpoints for managing user photos and gallery.
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/photos")
@@ -26,57 +24,60 @@ public class UserPhotoController {
     private final UserPhotoService userPhotoService;
 
     /**
-     * Uploads a new photo for a user.
-     * 
-     * @param request Photo upload request
-     * @return Created photo response with 201 CREATED status
+     * POST /api/photos
+     * Upload ảnh cho current user.
      */
     @PostMapping
     public ResponseEntity<UserPhotoResponse> create(
-            @Valid @RequestBody UserPhotoCreateRequest request) {
-        log.info("POST /api/photos - Uploading photo for user: {}", request.getUserId());
-        
+            @Valid @RequestBody UserPhotoCreateRequest request,
+            Authentication auth) {
+
+        UUID userId = (UUID) auth.getPrincipal();
+        request.setUserId(userId);   // Override từ JWT
+
+        log.info("POST /api/photos - userId: {}", userId);
+
         UserPhotoResponse response = userPhotoService.create(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
-     * Retrieves a specific photo by ID.
-     * 
-     * @param id The photo ID (UUID)
-     * @return Photo details with 200 OK status
+     * GET /api/photos/{id}
+     * Lấy thông tin ảnh theo photoId (public info).
      */
     @GetMapping("/{id}")
-    public ResponseEntity<UserPhotoResponse> get(
-            @PathVariable UUID id) {
+    public ResponseEntity<UserPhotoResponse> get(@PathVariable UUID id) {
         log.info("GET /api/photos/{} - Fetching photo", id);
-        
         UserPhotoResponse response = userPhotoService.get(id);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Retrieves all photos for a specific user.
-     * 
-     * @param userId The user ID (UUID)
-     * @return List of user's photos
+     * GET /api/photos/user/{userId}
+     * Lấy tất cả ảnh của user (public — để hiển thị profile).
      */
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<UserPhotoResponse>> getByUser(@PathVariable UUID userId) {
+        log.info("GET /api/photos/user/{} - Fetching photos", userId);
+        List<UserPhotoResponse> responses = userPhotoService.getByUser(userId);
+        return ResponseEntity.ok(responses);
+    }
 
 
     /**
-     * Deletes a photo by ID.
-     * 
-     * @param id The photo ID (UUID)
-     * @return 204 NO_CONTENT status
+     * DELETE /api/photos/{id}
+     * Xóa ảnh.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @PathVariable UUID id) {
-        log.info("DELETE /api/photos/{} - Deleting photo", id);
-        
-        userPhotoService.delete(id);
+            @PathVariable UUID id,
+            Authentication auth) {
+
+        UUID requesterId = (UUID) auth.getPrincipal();
+        log.info("DELETE /api/photos/{} - requesterId: {}", id, requesterId);
+
+        userPhotoService.delete(id, requesterId);   // Truyền requesterId để validate ownership
         return ResponseEntity.noContent().build();
     }
 }

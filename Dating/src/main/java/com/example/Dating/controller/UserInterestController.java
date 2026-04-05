@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,8 @@ public class UserInterestController {
     private final UserInterestService userInterestService;
 
     /**
+     * POST /api/user-interests
+     * Body: { "interestId": "uuid" }
      * Adds an interest to a user.
      * 
      * @param request User interest request
@@ -33,14 +36,17 @@ public class UserInterestController {
      */
     @PostMapping
     public ResponseEntity<UserInterestResponse> create(
-            @Valid @RequestBody UserInterestRequest request) {
-        log.info("POST /api/user-interests - Adding interest {} to user {}", 
-                request.getInterestId(), request.getUserId());
-        
+            @Valid @RequestBody UserInterestRequest request,
+            Authentication auth) {
+
+        UUID userId = (UUID) auth.getPrincipal();
+        request.setUserId(userId);   // Override từ JWT
+
+        log.info("POST /api/user-interests - userId: {}, interestId: {}",
+                userId, request.getInterestId());
+
         UserInterestResponse response = userInterestService.create(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -48,29 +54,45 @@ public class UserInterestController {
      * 
      * @param userId The user ID (UUID)
      * @return List of user's interests
+     * GET /api/user-interests/{userId}
+     * Lấy interests của user khác (public info, để hiển thị profile).
      */
     @GetMapping("/{userId}")
-    public ResponseEntity<List<UserInterestResponse>> getByUser(
-            @PathVariable UUID userId) {
-        log.info("GET /api/user-interests/{} - Fetching interests for user", userId);
-        
+    public ResponseEntity<List<UserInterestResponse>> getByUser(@PathVariable UUID userId) {
+        log.info("GET /api/user-interests/{} - Fetching interests", userId);
+        List<UserInterestResponse> responses = userInterestService.getByUser(userId);
+        return ResponseEntity.ok(responses);
+    }
+
+    /**
+     * GET /api/user-interests/me
+     * Lấy danh sách interests của current user.
+     *
+     */
+    @GetMapping("/me")
+    public ResponseEntity<List<UserInterestResponse>> getMyInterests(Authentication auth) {
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("GET /api/user-interests/me - userId: {}", userId);
+
         List<UserInterestResponse> responses = userInterestService.getByUser(userId);
         return ResponseEntity.ok(responses);
     }
 
     /**
      * Removes an interest from a user.
-     * 
-     * @param userId The user ID (UUID) - path variable
+     *  DELETE /api/user-interests/{interestId}
+     * userId lấy từ JWT
      * @param interestId The interest ID (UUID) - path variable
      * @return 204 NO_CONTENT status
      */
-    @DeleteMapping("/{userId}/{interestId}")
+    @DeleteMapping("/{interestId}")
     public ResponseEntity<Void> delete(
-            @PathVariable UUID userId,
-            @PathVariable UUID interestId) {
-        log.info("DELETE /api/user-interests/{}/{} - Removing interest from user", userId, interestId);
-        
+            @PathVariable UUID interestId,
+            Authentication auth) {
+
+        UUID userId = (UUID) auth.getPrincipal();
+        log.info("DELETE /api/user-interests/{} - userId: {}", interestId, userId);
+
         userInterestService.delete(userId, interestId);
         return ResponseEntity.noContent().build();
     }

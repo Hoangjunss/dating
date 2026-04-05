@@ -4,10 +4,9 @@ import com.example.Dating.dtos.request.ConversationCreateRequest;
 import com.example.Dating.dtos.response.ConversationResponse;
 import com.example.Dating.entities.Conversation;
 import com.example.Dating.entities.User;
-import com.example.Dating.entities.UserProfile;
 import com.example.Dating.exception.ResourceNotFoundException;
+import com.example.Dating.exception.ValidationException;
 import com.example.Dating.mapper.ConversationMapper;
-import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.ConversationRepository;
 import com.example.Dating.specification.ConversationSpecification;
 import jakarta.transaction.Transactional;
@@ -75,7 +74,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     @Transactional
-    public ConversationResponse createOrGet(UUID user1, UUID user2) {
+    public ConversationResponse createOrGet(UUID user1, UUID user2, boolean skipMatchValidation) {
         UUID first  = user1.compareTo(user2) < 0 ? user1 : user2;
         UUID second = user1.compareTo(user2) < 0 ? user2 : user1;
 
@@ -83,10 +82,11 @@ public class ConversationServiceImpl implements ConversationService {
         if (existing.isPresent()) {
             return ConversationMapper.toResponse(existing.get());
         }
-
-        // Check match tồn tại trước khi tạo conversation
-        if (!userMatchService.hasActiveMatch(user1, user2)) {
-            throw new IllegalStateException("Conversation can only be created between matched users");
+        if (!skipMatchValidation &&
+                !userMatchService.hasActiveMatch(user1, user2)) {
+            throw new IllegalStateException(
+                    "Conversation can only be created between matched users"
+            );
         }
 
         User userA = userService.findById(first);
@@ -102,11 +102,27 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
+    public ConversationResponse findById(UUID id, UUID requesterId) {
+
+        Conversation conv = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No conversation found with id: " + id));
+
+        boolean isMember = conv.getUserA().getUserId().equals(requesterId)
+                || conv.getUserB().getUserId().equals(requesterId);
+        if (!isMember) {
+            throw new ValidationException("You are not a member of this conversation");
+        }
+
+        return ConversationMapper.toResponse(conv);
+    }
+
+    @Override
     public ConversationResponse findById(UUID id) {
         return repository.findById(id)
                 .map(ConversationMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("No conversation found with id: " + id));
     }
+
 
     @Override
     public List<ConversationResponse> getUserConversations(UUID userId) {

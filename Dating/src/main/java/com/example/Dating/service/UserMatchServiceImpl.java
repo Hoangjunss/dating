@@ -4,6 +4,7 @@ import com.example.Dating.dtos.response.UserMatchResponse;
 import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserMatch;
 import com.example.Dating.entities.UserProfile;
+import com.example.Dating.exception.ValidationException;
 import com.example.Dating.mapper.UserMatchMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserMatchRepository;
@@ -61,14 +62,22 @@ public class UserMatchServiceImpl implements UserMatchService {
                 .map(UserMatchMapper::toResponse);
     }
     @Override
-    public void unmatch(UUID matchId) {
+    public void unmatch(UUID matchId, UUID requesterId) {
 
         UserMatch match = repository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Match not found"));
 
+        boolean isMember = match.getUserA().getUserId().equals(requesterId)
+                || match.getUserB().getUserId().equals(requesterId);
+        if (!isMember) {
+            throw new ValidationException("You are not a member of this match");
+        }
+
         match.setActive(false);
 
         repository.save(match);
+
+        log.info("Match {} unmatch bởi requesterId: {}", matchId, requesterId);
     }
 
     @Override
