@@ -56,12 +56,14 @@ public class UserPhotoController {
      * GET /api/photos/user/{userId}
      * Lấy tất cả ảnh của user (public — để hiển thị profile).
      */
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<UserPhotoResponse>> getByUser(@PathVariable UUID userId) {
         log.info("GET /api/photos/user/{} - Fetching photos", userId);
         List<UserPhotoResponse> responses = userPhotoService.getByUser(userId);
         return ResponseEntity.ok(responses);
     }
+
 
     /**
      * DELETE /api/photos/{id}

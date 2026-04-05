@@ -21,7 +21,7 @@ public interface UserPhotoService {
     /**
      * Retrieves all photos for a specific user.
      */
-    List<UserPhotoResponse> getByUser(UUID userId);
+   UserPhotoResponse getByUser(UUID userId);
     
     /**
      * Deletes a photo by ID.

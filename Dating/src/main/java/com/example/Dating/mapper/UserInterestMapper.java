@@ -16,6 +16,7 @@ public final class UserInterestMapper {
     public static UserInterestResponse toResponse(UserInterest e) {
         return UserInterestResponse.builder()
                 .id(e.getId())
+                .interestId(e.getInterest().getId())
                 .build();
     }
 }

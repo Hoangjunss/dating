@@ -51,7 +51,6 @@ public class InterestServiceImpl implements InterestService {
      * Retrieves an interest by ID.
      */
     @Override
-    @Transactional(readOnly = true)
     public InterestResponse get(UUID id) {
         log.debug("Fetching interest with id: {}", id);
         
@@ -67,7 +66,6 @@ public class InterestServiceImpl implements InterestService {
      * Retrieves all interests.
      */
     @Override
-    @Transactional(readOnly = true)
     public List<InterestResponse> getAll() {
         log.debug("Fetching all interests");
         

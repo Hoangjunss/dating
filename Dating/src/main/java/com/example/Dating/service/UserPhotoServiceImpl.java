@@ -77,13 +77,11 @@ public class UserPhotoServiceImpl implements UserPhotoService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<UserPhotoResponse> getByUser(UUID userId) {
+    public UserPhotoResponse getByUser(UUID userId) {
         log.debug("Fetching photos for userId: {}", userId);
         
-        return repository.findByUserProfile_UserId(userId)
-                .stream()
-                .map(UserPhotoMapper::toResponse)
-                .toList();
+        return UserPhotoMapper.toResponse( repository.findByUserProfile_Id(userId));
+
     }
 
     /**

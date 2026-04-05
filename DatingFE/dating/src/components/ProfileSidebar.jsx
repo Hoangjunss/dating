@@ -11,11 +11,14 @@ const ProfileSidebar = ({ bio, interests, postedImages }) => (
       </div>
       <div className="mt-6 pt-6 border-t border-rose-50">
         <div className="flex flex-wrap gap-2">
-          {interests.map((i, idx) => (
-            <span key={idx} className="px-3 py-1 bg-rose-50 text-rose-600 text-[10px] font-bold rounded-lg border border-rose-100 uppercase tracking-tighter">
-              {i}
-            </span>
-          ))}
+          {interests.map((interest) => (
+  <span 
+    key={interest.id} 
+    className="px-3 py-1 bg-rose-100 text-rose-600 rounded-full text-sm font-medium"
+  >
+    {interest.name} {/* Chỗ này quan trọng: Phải lấy .name ra để hiển thị */}
+  </span>
+))}
         </div>
       </div>
     </div>

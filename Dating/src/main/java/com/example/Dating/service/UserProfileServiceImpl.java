@@ -2,14 +2,17 @@ package com.example.Dating.service;
 
 import com.example.Dating.dtos.request.UserProfileCreateRequest;
 import com.example.Dating.dtos.request.UserProfileUpdateRequest;
-import com.example.Dating.dtos.response.UserPreferenceResponse;
-import com.example.Dating.dtos.response.UserProfileResponse;
+import com.example.Dating.dtos.response.*;
 import com.example.Dating.entities.User;
+import com.example.Dating.entities.UserPhoto;
 import com.example.Dating.entities.UserPreference;
 import com.example.Dating.entities.UserProfile;
 import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
+import com.example.Dating.mapper.InterestMapper;
 import com.example.Dating.mapper.UserProfileMapper;
+import com.example.Dating.repository.InterestRepository;
+import com.example.Dating.repository.UserPhotoRepository;
 import com.example.Dating.repository.UserProfileRepository;
 import com.example.Dating.repository.UserRepository;
 import com.example.Dating.specification.UserProfileSpecification;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -45,6 +49,10 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
     private final UserPreferenceService userPreferenceService;
+    private final UserPhotoRepository userPhotoRepository;
+    private final UserInterestService userInterestService;
+    private final InterestRepository interestRepository;
+
 
     /**
      * Create UserProfile (after registration).
@@ -73,25 +81,39 @@ public class UserProfileServiceImpl implements UserProfileService {
         profile.setUser(user);
         userProfileRepository.save(profile);
 
-        log.info("UserProfile saved with userId: {}", profile.getUserId());
+        log.info("UserProfile saved with userId: {}", profile.getUser());
 
         return UserProfileMapper.toResponse(profile);
     }
-    /**
-     * Retrieves a single profile by userId.
-     *
-     * @param userId The user ID
-     * @return User profile response
-     * @throws ResourceNotFoundException if profile not found
-     */
     @Override
-    @Transactional(readOnly = true)
     public UserProfileResponse get(UUID userId) {
         log.debug("Fetching profile for userId: {}", userId);
-        
-        return UserProfileMapper.toResponse(findById(userId));
-    }
 
+        // 1. Tìm UserProfile (Entity này đã có sẵn User bên trong nhờ @OneToOne)
+        UserProfile userProfile = userProfileRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for userId: " + userId));
+
+        // 2. Chuyển đổi sang Response DTO cơ bản
+        UserProfileResponse response = UserProfileMapper.toResponse(userProfile);
+
+        // 3. Lấy danh sách Interest IDs từ bảng trung gian UserInterest
+        List<UserInterestResponse> userInterests = userInterestService.getByUser(userId);
+        log.info(">>> DEBUG INTEREST: Tìm thấy {} bản ghi UserInterest cho user này", userInterests);
+
+        // 4. Duyệt qua danh sách ID đó để lấy Name từ InterestService
+        List<InterestResponse> interests = userInterests.stream()
+                .map(ui -> interestRepository.findById(ui.getInterestId()) // Gọi trực tiếp Repo
+                        .map(InterestMapper::toResponse)
+                        .orElse(null)) // Nếu không thấy thì trả về null, không ném lỗi
+                .filter(Objects::nonNull)
+                .toList();
+
+        response.setInterestResponses(interests);
+        UserPhoto userPhoto=userPhotoRepository.findByUserProfile_Id(userId);
+        response.setImage(userPhoto.getUrl());
+
+        return response;
+    }
     /**
      * Retrieves all profiles in the system.
      * 

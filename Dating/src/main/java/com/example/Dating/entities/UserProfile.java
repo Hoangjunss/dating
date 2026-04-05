@@ -17,7 +17,8 @@ import java.util.UUID;
 public class UserProfile {
 
     @Id
-    private UUID userId;
+    @GeneratedValue
+    private UUID id;
 
     @Column(nullable = false)
     private String displayName;
