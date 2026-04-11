@@ -18,7 +18,6 @@
 ## 📋 Mục lục
 
 - [Tổng quan](#tổng-quan)
-- [Screenshots](#screenshots)
 - [Tính năng](#tính-năng)
 - [Kiến trúc hệ thống](#kiến-trúc-hệ-thống)
 - [Thuật toán Recommendation](#thuật-toán-recommendation)

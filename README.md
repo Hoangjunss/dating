@@ -18,7 +18,6 @@ A full-stack dating platform featuring a smart recommendation engine based on **
 ## 📋 Table of Contents
 
 - [Overview](#overview)
-- [Screenshots](#screenshots)
 - [Features](#features)
 - [System Architecture](#system-architecture)
 - [Recommendation Algorithm](#recommendation-algorithm)
