@@ -13,55 +13,55 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class UserProfile {
+    @Builder
+    public class UserProfile {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
+        @Id
+        @GeneratedValue
+        private UUID id;
 
-    @Column(nullable = false)
-    private String displayName;
+        @Column(nullable = false)
+        private String displayName;
 
-    private String gender;
+        private String gender;
 
-    private LocalDate birthday;
+        private LocalDate birthday;
 
-    @Column(length = 500)
-    private String bio;
+        @Column(length = 500)
+        private String bio;
 
-    private Integer heightCm;
+        private Integer heightCm;
 
-    private String job;
+        private String job;
 
-    private String education;
+        private String education;
 
-    private String city;
+        private String city;
 
-    private Double latitude;
+        private Double latitude;
 
-    private Double longitude;
+        private Double longitude;
 
-    private Boolean verified;
+        private Boolean verified;
 
-    private Instant createdAt;
+        private Instant createdAt;
 
-    private Instant updatedAt;
+        private Instant updatedAt;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "user_id")
-    private User user;
+        @OneToOne(fetch = FetchType.LAZY)
+        @MapsId
+        @JoinColumn(name = "user_id")
+        private User user;
 
-    @PrePersist
-    void prePersist() {
-        createdAt = Instant.now();
-        updatedAt = Instant.now();
-        verified = false;
+        @PrePersist
+        void prePersist() {
+            createdAt = Instant.now();
+            updatedAt = Instant.now();
+            verified = false;
+        }
+
+        @PreUpdate
+        void preUpdate() {
+            updatedAt = Instant.now();
+        }
     }
-
-    @PreUpdate
-    void preUpdate() {
-        updatedAt = Instant.now();
-    }
-}

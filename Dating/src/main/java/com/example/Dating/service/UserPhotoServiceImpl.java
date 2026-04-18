@@ -77,10 +77,13 @@ public class UserPhotoServiceImpl implements UserPhotoService {
      */
     @Override
     @Transactional(readOnly = true)
-    public UserPhotoResponse getByUser(UUID userId) {
+    public List<UserPhotoResponse> getByUser(UUID userId) {
         log.debug("Fetching photos for userId: {}", userId);
-        
-        return UserPhotoMapper.toResponse( repository.findByUserProfile_Id(userId));
+
+        return repository.findByUserProfile_User_UserId(userId)
+                .stream()
+                .map(UserPhotoMapper::toResponse)
+                .toList();
 
     }
 
@@ -96,7 +99,7 @@ public class UserPhotoServiceImpl implements UserPhotoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Photo not found: " + id));
 
 
-        if (!photo.getUserProfile().getUserId().equals(requesterId)) {
+        if (!photo.getUserProfile().getUser().getUserId().equals(requesterId)) {
             throw new ValidationException("You can only delete your own photos");
         }
         

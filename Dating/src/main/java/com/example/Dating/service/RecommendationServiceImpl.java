@@ -77,7 +77,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         }
 
         List<UUID> poolIds = pool.stream()
-                .map(UserProfile::getUserId)
+                .map(p -> p.getUser().getUserId())
                 .collect(Collectors.toList());
 
         Map<UUID, UserEloScore> eloMap = userEloScoreRepository.findAllById(poolIds)
@@ -146,7 +146,7 @@ public class RecommendationServiceImpl implements RecommendationService {
             Map<UUID, Set<UUID>> candidateInterestMap,
             UserPreferenceResponse pref  // nhận pref để dùng maxDistanceKm thật
     ) {
-        UUID cid = candidate.getUserId();
+        UUID cid = candidate.getUser().getUserId();
 
         double interestScore = jaccard(myInterests, candidateInterestMap.getOrDefault(cid, Set.of()));
 
@@ -224,10 +224,10 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     //batch load photos — trả về map userId → List<url> sorted by sortOrder
     private Map<UUID, List<String>> loadPhotoUrls(List<UUID> userIds) {
-        return userPhotoRepository.findByUserProfile_UserIdIn(userIds).stream()
+        return userPhotoRepository.findByUserProfile_User_UserIdIn(userIds).stream()
                 .sorted(Comparator.comparingInt(p -> (p.getSortOrder() != null ? p.getSortOrder() : 999)))
                 .collect(Collectors.groupingBy(
-                        p -> p.getUserProfile().getUserId(),
+                        p -> p.getUserProfile().getUser().getUserId(),
                         Collectors.mapping(UserPhoto::getUrl, Collectors.toList())
                 ));
     }
@@ -291,15 +291,15 @@ public class RecommendationServiceImpl implements RecommendationService {
                     p.getLatitude(), p.getLongitude()) * 10.0) / 10.0;
         }
         return CandidateResponse.builder()
-                .userId(p.getUserId())
+                .userId(p.getUser().getUserId())
                 .displayName(p.getDisplayName())
                 .gender(p.getGender())
                 .age(age)
                 .city(p.getCity())
                 .distanceKm(distKm)
                 .bio(p.getBio())
-                .photoUrls(photoMap.getOrDefault(p.getUserId(), List.of()))
-                .interests(interestNameMap.getOrDefault(p.getUserId(), List.of()))
+                .photoUrls(photoMap.getOrDefault(p.getUser().getUserId(), List.of()))
+                .interests(interestNameMap.getOrDefault(p.getUser().getUserId(), List.of()))
                 .score(sc.compositeScore())
                 .interestScore(sc.interestScore())
                 .eloScore(sc.eloScore())

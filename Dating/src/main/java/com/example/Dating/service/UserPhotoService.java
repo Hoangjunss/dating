@@ -7,22 +7,22 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserPhotoService {
-    
+
     /**
      * Creates a new user photo.
      */
     UserPhotoResponse create(UserPhotoCreateRequest request);
-    
+
     /**
      * Retrieves a photo by ID.
      */
     UserPhotoResponse get(UUID id);
-    
+
     /**
      * Retrieves all photos for a specific user.
      */
-   UserPhotoResponse getByUser(UUID userId);
-    
+    List<UserPhotoResponse> getByUser(UUID userId);
+
     /**
      * Deletes a photo by ID.
      */

@@ -85,6 +85,7 @@ public class SecurityConfig {
 
                         // WebSocket handshake (SockJS)
                         .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/socket.io/**").permitAll()
 
                         // Admin-only: Interest CRUD (master data)
                         // Nếu chưa có ADMIN role, tạm set authenticated()

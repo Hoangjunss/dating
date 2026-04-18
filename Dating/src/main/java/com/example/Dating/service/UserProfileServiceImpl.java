@@ -109,8 +109,13 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .toList();
 
         response.setInterestResponses(interests);
-        UserPhoto userPhoto=userPhotoRepository.findByUserProfile_Id(userId);
-        response.setImage(userPhoto.getUrl());
+
+        String imageUrl = userPhotoRepository
+                .findFirstByUserProfile_User_UserIdAndIsPrimaryTrue(userId)
+                .map(UserPhoto::getUrl)
+                .orElse(null);
+
+        response.setImage(imageUrl);
 
         return response;
     }
