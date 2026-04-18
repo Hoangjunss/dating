@@ -12,7 +12,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     if (!authUserId) return;
-    getUsers(authUserId);
+    getUsers();
   }, [getUsers, authUserId]);
   console.log("Users in sidebar:", users);
   

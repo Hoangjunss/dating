@@ -9,6 +9,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from './store/useAuthStore';
 import { useEffect } from 'react';
+import NotificationSocketBridge from './components/NotificationSocketBridge';
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -23,6 +24,7 @@ const App = () => {
 
   return (
     <div >
+      {authUser && <NotificationSocketBridge />}
       <Navbar />
       <Routes>
         <Route path='/' element={authUser ? <HomePage/> : <Navigate to='/login' replace />} />

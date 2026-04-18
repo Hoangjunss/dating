@@ -11,13 +11,21 @@ export const useChatStore = create((set, get) => ({
   isMessagesLoading: false,
   conversationSub: null,
 
-  getUsers: async (userId) => {
+  getUsers: async () => {
     set({ isUsersLoading: true });
     try {
-      const res = await axiosInstance.get(`/conversations/user/${userId}`);
-      set({ users: res.data.content });
+      const res = await axiosInstance.get("/conversations/me");
+      const raw = Array.isArray(res.data) ? res.data : res.data?.content ?? [];
+      set({
+        users: raw.map((c) => ({
+          id: c.id,
+          fullName: c.nickName || "Trò chuyện",
+          profilePic: null,
+          status: "offline",
+        })),
+      });
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Không tải được danh sách hội thoại");
     } finally {
       set({ isUsersLoading: false });
     }
