@@ -15,6 +15,9 @@ public final class MessageMapper {
     private MessageMapper() {}
 
     public static MessageResponse toResponse(Message message) {
+
+        if(message == null) return null;
+
         boolean isUnsent = Boolean.TRUE.equals(message.getUnsent());
 
         return MessageResponse.builder()

@@ -16,7 +16,11 @@ public final class ConversationMapper {
                 .countUnSeen(e.getMessages().stream()
                         .filter(message -> message.getSeen() == Boolean.FALSE).toList().size()
                 )
-                .lastMessage(MessageMapper.toResponse(e.getMessages().getLast()))
+                .lastMessage(MessageMapper.toResponse(
+                        (e.getMessages() != null && !e.getMessages().isEmpty())
+                                ? e.getMessages().getLast()
+                                : null
+                ))
                 .build();
     }
 }
