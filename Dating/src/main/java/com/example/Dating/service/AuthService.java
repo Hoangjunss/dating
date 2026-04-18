@@ -4,6 +4,7 @@ import com.example.Dating.dtos.request.LoginRequest;
 import com.example.Dating.dtos.request.RefreshTokenRequest;
 import com.example.Dating.dtos.request.RegisterRequest;
 import com.example.Dating.dtos.response.AuthResponse;
+import com.example.Dating.dtos.response.TokenResponse;
 import com.example.Dating.entities.User;
 
 import java.util.UUID;
@@ -17,4 +18,6 @@ public interface AuthService {
     AuthResponse refreshToken(RefreshTokenRequest request);
 
     User findById(UUID id);
+
+    TokenResponse me();
 }

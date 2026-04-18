@@ -4,6 +4,8 @@ import com.example.Dating.dtos.request.LoginRequest;
 import com.example.Dating.dtos.request.RefreshTokenRequest;
 import com.example.Dating.dtos.request.RegisterRequest;
 import com.example.Dating.dtos.response.AuthResponse;
+import com.example.Dating.dtos.response.TokenResponse;
+import com.example.Dating.dtos.response.UserResponse;
 import com.example.Dating.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,5 +61,12 @@ public class AuthController {
         log.info("POST /api/auth/refresh");
         AuthResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<TokenResponse> me() {
+        log.info("GET /api/auth/me");
+        TokenResponse up = authService.me();
+        return ResponseEntity.ok(up);
     }
 }

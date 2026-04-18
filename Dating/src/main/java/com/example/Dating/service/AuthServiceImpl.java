@@ -4,22 +4,26 @@ import com.example.Dating.dtos.request.LoginRequest;
 import com.example.Dating.dtos.request.RefreshTokenRequest;
 import com.example.Dating.dtos.request.RegisterRequest;
 import com.example.Dating.dtos.response.AuthResponse;
+import com.example.Dating.dtos.response.TokenResponse;
+import com.example.Dating.dtos.response.UserResponse;
 import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserEloScore;
 import com.example.Dating.exception.DuplicateResourceException;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.exception.ValidationException;
+import com.example.Dating.mapper.UserMapper;
 import com.example.Dating.repository.UserEloScoreRepository;
 import com.example.Dating.repository.UserRepository;
 import com.example.Dating.security.JwtTokenProvider;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -141,5 +145,24 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public User findById(UUID id) {
         return userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found"));
+    }
+
+    @Override
+    public TokenResponse me() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        User u = findById((UUID) authentication.getPrincipal());
+
+        UserResponse user = UserMapper.toResponse(u);
+
+        String accessToken =  tokenProvider.generateAccessToken(u.getUserId(), u.getUsername());
+
+        return TokenResponse.builder()
+                .user(user)
+                .accessToken(accessToken)
+                .build();
     }
 }
