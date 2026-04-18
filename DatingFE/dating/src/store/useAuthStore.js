@@ -48,7 +48,7 @@ export const useAuthStore = create(
 
       checkAuth: async () => {
         try {
-          const res = await axiosInstance.get("/users/me");
+          const res = await axiosInstance.get("/auth/me");
           const user = extractUserFromAuthResponse(res);
           const token = extractTokenFromAuthResponse(res);
 
