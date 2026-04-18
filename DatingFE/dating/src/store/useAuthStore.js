@@ -1,10 +1,38 @@
 import { create } from "zustand";
-import { axiosInstance } from "../lib/axios.js";
+import {
+  axiosInstance,
+  getStoredAccessToken,
+  setStoredAccessToken,
+  clearStoredAccessToken,
+} from "../lib/axios.js";
 import toast from "react-hot-toast";
-import { io } from "socket.io-client";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-const BASE_URL =   "http://localhost:8080/api/v1";
+/** Cùng origin với API (axios baseURL = `${WS_ORIGIN}/api`) */
+const WS_ORIGIN = "http://localhost:8080";
+
+const extractTokenFromAuthResponse = (res) => {
+  const bodyToken =
+    res?.data?.accessToken ||
+    res?.data?.token ||
+    res?.data?.jwt ||
+    res?.data?.data?.accessToken ||
+    res?.data?.data?.token ||
+    null;
+
+  if (bodyToken) return bodyToken;
+
+  const authHeader = res?.headers?.authorization || res?.headers?.Authorization;
+  if (!authHeader) return null;
+
+  return authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
+};
+
+const extractUserFromAuthResponse = (res) => {
+  return res?.data?.user || res?.data?.data?.user || res?.data;
+};
 
 export const useAuthStore = create(
   persist(
@@ -15,17 +43,27 @@ export const useAuthStore = create(
       isUpdatingProfile: false,
       isCheckingAuth: true,
       onlineUsers: [],
-      socket: null,
+      stompClient: null,
+      stompConnected: false,
 
-      // 1. Kiểm tra Auth (Kết hợp gọi API để làm mới data)
       checkAuth: async () => {
         try {
-          const res = await axiosInstance.get("/auth/check");
-          set({ authUser: res.data });
+          const res = await axiosInstance.get("/users/me");
+          const user = extractUserFromAuthResponse(res);
+          const token = extractTokenFromAuthResponse(res);
+
+          if (token) {
+            setStoredAccessToken(token);
+          }
+
+          set({ authUser: user });
           get().connectSocket();
         } catch (error) {
-          console.log("Error in checkAuth:", error);
-          // Nếu API báo lỗi (token hết hạn), xóa user để bắt login lại
+          const status = error?.response?.status;
+          if (status && status !== 401) {
+            console.log("Error in checkAuth:", error);
+          }
+          clearStoredAccessToken();
           set({ authUser: null });
           get().disconnectSocket();
         } finally {
@@ -37,7 +75,14 @@ export const useAuthStore = create(
         set({ isSigningUp: true });
         try {
           const res = await axiosInstance.post("/auth/register", data);
-          set({ authUser: res.data });
+          const user = extractUserFromAuthResponse(res);
+          const token = extractTokenFromAuthResponse(res);
+
+          if (token) {
+            setStoredAccessToken(token);
+          }
+
+          set({ authUser: user });
           toast.success("Account created successfully");
           get().connectSocket();
         } catch (error) {
@@ -51,7 +96,14 @@ export const useAuthStore = create(
         set({ isLoggingIn: true });
         try {
           const res = await axiosInstance.post("/auth/login", data);
-          set({ authUser: res.data }); // Tự động lưu vào localStorage nhờ persist
+          const user = extractUserFromAuthResponse(res);
+          const token = extractTokenFromAuthResponse(res);
+
+          if (token) {
+            setStoredAccessToken(token);
+          }
+
+          set({ authUser: user });
           toast.success("Logged in successfully");
           get().connectSocket();
         } catch (error) {
@@ -64,7 +116,8 @@ export const useAuthStore = create(
       logout: async () => {
         try {
           await axiosInstance.post("/auth/logout");
-          set({ authUser: null }); // Tự động xóa khỏi localStorage
+          clearStoredAccessToken();
+          set({ authUser: null });
           toast.success("Logged out successfully");
           get().disconnectSocket();
         } catch (error) {
@@ -86,39 +139,58 @@ export const useAuthStore = create(
         }
       },
 
-      // 2. Quản lý Socket
+      /**
+       * STOMP + SockJS — khớp Spring WebSocketSecurityConfig:
+       * SockJS endpoint /ws, JWT trong CONNECT header Authorization: Bearer + access token
+       */
       connectSocket: () => {
-        const { authUser, socket: existingSocket } = get();
-        
-        // Nếu không có user hoặc socket đang chạy rồi thì thôi
-        if (!authUser || existingSocket?.connected) return;
+        const { authUser, stompClient: existing } = get();
+        const token = getStoredAccessToken();
 
-        // Lưu ý: Sử dụng authUser.userId (vì JSON của bạn dùng key này)
-        const socket = io(BASE_URL, {
-          query: {
-            userId: authUser.userId || authUser._id, 
+        if (!authUser || !token) return;
+
+        if (existing?.active) return;
+
+        get().disconnectSocket();
+
+        const client = new Client({
+          webSocketFactory: () => new SockJS(`${WS_ORIGIN}/ws`),
+          connectHeaders: {
+            Authorization: `Bearer ${token}`,
+          },
+          reconnectDelay: 5000,
+          heartbeatIncoming: 4000,
+          heartbeatOutgoing: 4000,
+          onConnect: () => {
+            set({ stompConnected: true });
+          },
+          onDisconnect: () => {
+            set({ stompConnected: false });
+          },
+          onWebSocketClose: () => {
+            set({ stompConnected: false });
+          },
+          onStompError: (frame) => {
+            console.error("[STOMP]", frame.headers["message"], frame.body);
+            toast.error("Lỗi kết nối chat (STOMP)");
           },
         });
 
-        socket.connect();
-        set({ socket: socket });
-
-        socket.on("getOnlineUsers", (userIds) => {
-          set({ onlineUsers: userIds });
-        });
+        set({ stompClient: client });
+        client.activate();
       },
 
       disconnectSocket: () => {
-        if (get().socket?.connected) {
-          get().socket.disconnect();
-          set({ socket: null });
+        const client = get().stompClient;
+        if (client) {
+          client.deactivate();
+          set({ stompClient: null, stompConnected: false });
         }
       },
     }),
     {
-      name: "auth-storage", // Key lưu dưới LocalStorage
+      name: "auth-storage",
       storage: createJSONStorage(() => localStorage),
-      // Chỉ lưu authUser vào localStorage, các trạng thái loading không cần lưu
       partialize: (state) => ({ authUser: state.authUser }),
     }
   )

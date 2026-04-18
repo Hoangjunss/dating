@@ -5,23 +5,31 @@ import LoginPage from './page/LoginPage'
 import HomePage from './page/HomePage'
 import ProfilePage from './page/ProfilePage'
 import MatchPage from './page/MatchPage'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from './store/useAuthStore';
 import { useEffect } from 'react';
 
 const App = () => {
-  const { authUser, checkAuth } = useAuthStore();
+  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (isCheckingAuth && !authUser) {
+    return null;
+  }
 
   return (
     <div >
       <Navbar />
       <Routes>
-        <Route path='/' element={<HomePage/>} />
-        <Route path='/signup' element={<SignUpPage/>} />
-        <Route path='/login' element={<LoginPage/>} />
-        <Route path='/profile' element={<ProfilePage/>} />
-        <Route path="/match" element={<MatchPage />} />
+        <Route path='/' element={authUser ? <HomePage/> : <Navigate to='/login' replace />} />
+        <Route path='/signup' element={!authUser ? <SignUpPage/> : <Navigate to='/' replace />} />
+        <Route path='/login' element={!authUser ? <LoginPage/> : <Navigate to='/' replace />} />
+        <Route path='/profile' element={authUser ? <ProfilePage/> : <Navigate to='/login' replace />} />
+        <Route path="/match" element={authUser ? <MatchPage /> : <Navigate to='/login' replace />} />
       </Routes>
       <Toaster />
     </div>

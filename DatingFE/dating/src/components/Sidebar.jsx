@@ -8,16 +8,19 @@ const Sidebar = () => {
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
   const { authUser } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const authUserId = authUser?.userId || authUser?._id;
 
   useEffect(() => {
-    getUsers(authUser.userId);
-  }, [getUsers, authUser.userId]);
+    if (!authUserId) return;
+    getUsers(authUserId);
+  }, [getUsers, authUserId]);
   console.log("Users in sidebar:", users);
   
+  if (!authUserId) return null;
 
   const filteredUsers = showOnlineOnly
-    ? users.filter((user) => authUser.userId !== user.id && user.status === "online")
-    : users.filter((user) => authUser.userId !== user.id);
+    ? users.filter((user) => authUserId !== user.id && user.status === "online")
+    : users.filter((user) => authUserId !== user.id);
 
   if (isUsersLoading) return <SidebarSkeleton />;
 
@@ -62,7 +65,7 @@ const Sidebar = () => {
         {filteredUsers.map((user) => (
           <button
             key={user.id}
-            onClick={() => setSelectedUser(user.id)}
+            onClick={() => setSelectedUser(user)}
             className={`
               w-full p-4 flex items-center gap-4 rounded-2xl transition-all duration-300
               ${selectedUser?.id === user.id

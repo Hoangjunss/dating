@@ -6,7 +6,9 @@ const ChatHeader = () => {
   const { selectedUser, setSelectedUser } = useChatStore();
   const { onlineUsers } = useAuthStore();
 
-  const isOnline = onlineUsers.includes(selectedUser.id);
+  if (!selectedUser) return null;
+
+  const isOnline = onlineUsers.map(String).includes(String(selectedUser.id));
 
   return (
     <div className="p-5 border-b border-rose-100 bg-white sticky top-0 z-10">
