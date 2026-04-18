@@ -39,6 +39,7 @@ public class MessageServiceImpl implements MessageService {
     private final AuthService        userService;
     private final ApplicationEventPublisher eventPublisher;
     private final UnsendPolicy              unsendPolicy;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -61,6 +62,8 @@ public class MessageServiceImpl implements MessageService {
 
         conversation.setLastActivityAt(Instant.now());
         conversationRepository.save(conversation);
+
+        notifyPeerNewMessage(conversation, sender, MessageType.TEXT, request.getContent());
 
         return MessageMapper.toResponse(message);
     }
@@ -85,6 +88,8 @@ public class MessageServiceImpl implements MessageService {
 
         conversation.setLastActivityAt(Instant.now());
         conversationRepository.save(conversation);
+
+        notifyPeerNewMessage(conversation, sender, MessageType.PHOTO, null);
 
         return MessageMapper.toResponse(message);
     }
@@ -191,5 +196,28 @@ public class MessageServiceImpl implements MessageService {
         if (!message.getSender().getUserId().equals(requesterId)) {
             throw new ValidationException("Only the original sender can perform this action");
         }
+    }
+
+    private void notifyPeerNewMessage(Conversation conv, User sender, MessageType type, String textPreview) {
+        UUID peerId = conv.getUserA().getUserId().equals(sender.getUserId())
+                ? conv.getUserB().getUserId()
+                : conv.getUserA().getUserId();
+
+        String title = "Tin nhắn từ " + sender.getUsername();
+        String body = type == MessageType.PHOTO
+                ? "Đã gửi một ảnh"
+                : (textPreview != null ? textPreview : "");
+        if (body.length() > 200) {
+            body = body.substring(0, 197) + "...";
+        }
+
+        notificationService.createAndPush(
+                peerId,
+                NotificationType.NEW_MESSAGE,
+                title,
+                body,
+                conv.getId(),
+                sender.getUserId()
+        );
     }
 }

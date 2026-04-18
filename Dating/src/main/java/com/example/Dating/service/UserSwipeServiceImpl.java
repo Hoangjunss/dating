@@ -4,6 +4,7 @@ import com.example.Dating.dtos.request.SwipeRequest;
 import com.example.Dating.dtos.response.ConversationResponse;
 import com.example.Dating.dtos.response.SwipeResultResponse;
 import com.example.Dating.dtos.response.UserMatchResponse;
+import com.example.Dating.entities.NotificationType;
 import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserSwipe;
 import com.example.Dating.repository.UserSwipeRepository;
@@ -24,6 +25,7 @@ public class UserSwipeServiceImpl implements UserSwipeService {
     private final UserMatchService userMatchService;
     private final ConversationService conversationService;
     private final RecommendationService recommendationService;
+    private final NotificationService notificationService;
 
     @Transactional
     @Override
@@ -65,6 +67,24 @@ public class UserSwipeServiceImpl implements UserSwipeService {
 
             ConversationResponse convResp = conversationService.createOrGet(fromId, toId, true);
             conversationId = convResp.getId();
+
+            String title = "Trùng hợp!";
+            notificationService.createAndPush(
+                    fromId,
+                    NotificationType.NEW_MATCH,
+                    title,
+                    "Bạn và " + toUser.getUsername() + " đã thích nhau — hãy bắt đầu trò chuyện!",
+                    conversationId,
+                    toId
+            );
+            notificationService.createAndPush(
+                    toId,
+                    NotificationType.NEW_MATCH,
+                    title,
+                    "Bạn và " + fromUser.getUsername() + " đã thích nhau — hãy bắt đầu trò chuyện!",
+                    conversationId,
+                    fromId
+            );
         }
 
         return new SwipeResultResponse(
