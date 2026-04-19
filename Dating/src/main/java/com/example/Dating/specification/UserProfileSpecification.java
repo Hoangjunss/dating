@@ -66,7 +66,7 @@ public class UserProfileSpecification {
             Root<UserProfile> root,
             CriteriaBuilder cb
     ) {
-        return cb.notEqual(root.get("userId"), currentUserId);
+        return cb.notEqual(root.get("id"), currentUserId);
     }
 
     private static Predicate byGender(

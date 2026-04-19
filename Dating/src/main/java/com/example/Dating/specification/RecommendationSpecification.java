@@ -29,11 +29,11 @@ public class RecommendationSpecification {
             List<Predicate> predicates = new ArrayList<>();
 
             // 1. Exclude self
-            predicates.add(cb.notEqual(root.get("userId"), currentUserId));
+            predicates.add(cb.notEqual(root.get("id"), currentUserId));
 
             // 2. Exclude already-swiped users
             if (!alreadySwipedIds.isEmpty()) {
-                predicates.add(root.get("userId").in(alreadySwipedIds).not());
+                predicates.add(root.get("id").in(alreadySwipedIds).not());
             }
 
             // 3. Gender preference
