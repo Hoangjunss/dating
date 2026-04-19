@@ -1,16 +1,36 @@
-// ============================================================
-//  UserCard.jsx
-// ============================================================
 import { useState } from "react";
 import { Heart, X, MessageCircle, MapPin, Users } from "lucide-react";
 
+/** Avatar mặc định dạng SVG inline khi user chưa có ảnh */
+const DefaultAvatar = () => (
+  <svg
+    viewBox="0 0 200 200"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+  >
+    <rect width="200" height="200" fill="#1e293b" />
+    <circle cx="100" cy="78" r="38" fill="#334155" />
+    <ellipse cx="100" cy="175" rx="58" ry="42" fill="#334155" />
+  </svg>
+);
+
 const UserCard = ({ user, onLike, onSkip, onMessage, isOnline }) => {
   const [imgLoaded,    setImgLoaded]    = useState(false);
+  const [imgError,     setImgError]     = useState(false);
   const [localLiked,   setLocalLiked]   = useState(false);
   const [localSkipped, setLocalSkipped] = useState(false);
   const [hovered,      setHovered]      = useState(false);
 
   const done = localLiked || localSkipped;
+
+  // ── Map CandidateResponse ──
+  const displayName = user.displayName || "Ẩn danh";
+  const age         = user.age ?? "";
+  const city        = user.city || "";
+  const interests   = user.interests?.length ? user.interests : [];
+  // Lấy ảnh đầu tiên trong photoUrls, nếu không có thì dùng default
+  const photoUrl    = user.photoUrls?.[0] ?? null;
+  const hasPhoto    = !!photoUrl && !imgError;
 
   const handleLike = async (e) => {
     e.stopPropagation();
@@ -26,9 +46,6 @@ const UserCard = ({ user, onLike, onSkip, onMessage, isOnline }) => {
   };
   const handleMessage = (e) => { e.stopPropagation(); onMessage(user); };
 
-  const interests = user.interests || ["Chat", "Bạn bè", "Kết nối"];
-  const age = user.age || "";
-
   return (
     <div
       onMouseEnter={() => setHovered(true)}
@@ -36,7 +53,7 @@ const UserCard = ({ user, onLike, onSkip, onMessage, isOnline }) => {
       style={{
         aspectRatio: "3/4",
         borderRadius: "20px",
-        overflow: "hidden",      /* ← clip mọi thứ bên trong */
+        overflow: "hidden",
         position: "relative",
         cursor: "pointer",
         userSelect: "none",
@@ -48,29 +65,37 @@ const UserCard = ({ user, onLike, onSkip, onMessage, isOnline }) => {
         transition: "transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease",
       }}
     >
-      {/* ── Ảnh ── */}
-      {!imgLoaded && (
-        <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"#222" }}>
+      {/* ── Avatar default (khi không có ảnh hoặc ảnh lỗi) ── */}
+      {!hasPhoto && <DefaultAvatar />}
+
+      {/* ── Placeholder loading ── */}
+      {hasPhoto && !imgLoaded && (
+        <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"#1e293b" }}>
           <Users style={{ width:44, height:44, opacity:0.15 }} />
         </div>
       )}
-      <img
-        src={user.profilePic || "/avatar.png"}
-        alt={user.fullName}
-        draggable={false}
-        style={{
-          position: "absolute", inset: 0,
-          width: "100%", height: "100%",
-          objectFit: "cover",
-          opacity: imgLoaded ? 1 : 0,
-          transform: hovered && !done ? "scale(1.12)" : "scale(1.0)",
-          transition: "transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.3s",
-          transformOrigin: "center 30%",
-        }}
-        onLoad={() => setImgLoaded(true)}
-      />
 
-      {/* ── Gradient tối dần khi hover ── */}
+      {/* ── Ảnh thật ── */}
+      {hasPhoto && (
+        <img
+          src={photoUrl}
+          alt={displayName}
+          draggable={false}
+          style={{
+            position: "absolute", inset: 0,
+            width: "100%", height: "100%",
+            objectFit: "cover",
+            opacity: imgLoaded ? 1 : 0,
+            transform: hovered && !done ? "scale(1.12)" : "scale(1.0)",
+            transition: "transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.3s",
+            transformOrigin: "center 30%",
+          }}
+          onLoad={() => setImgLoaded(true)}
+          onError={() => setImgError(true)}
+        />
+      )}
+
+      {/* ── Gradient overlay ── */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
         background: hovered && !done
@@ -79,7 +104,7 @@ const UserCard = ({ user, onLike, onSkip, onMessage, isOnline }) => {
         transition: "background 0.4s ease",
       }} />
 
-      {/* ── Nút tim (luôn hiện) ── */}
+      {/* ── Nút tim ── */}
       <button
         onClick={handleLike}
         disabled={done}
@@ -152,13 +177,7 @@ const UserCard = ({ user, onLike, onSkip, onMessage, isOnline }) => {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════
-          HOVER PANEL — position absolute, trượt lên
-          KHÔNG dùng translateY trên wrapper nữa
-          Mọi thứ nằm gọn trong overflow:hidden
-      ══════════════════════════════════════════════ */}
-
-      {/* Panel thông tin hover — slide từ bottom lên */}
+      {/* ── Hover panel — slide từ bottom lên ── */}
       <div style={{
         position: "absolute",
         left: 0, right: 0, bottom: 0,
@@ -167,34 +186,36 @@ const UserCard = ({ user, onLike, onSkip, onMessage, isOnline }) => {
         transform: hovered && !done ? "translateY(0)" : "translateY(100%)",
         transition: "transform 0.4s cubic-bezier(0.4,0,0.2,1)",
       }}>
-        {/* Location */}
-        {user.location && (
+        {/* City */}
+        {city && (
           <div style={{ display:"flex", alignItems:"center", gap:4, marginBottom:7 }}>
             <MapPin style={{ width:11, height:11, color:"#fb7185", flexShrink:0 }} />
-            <span style={{ color:"rgba(255,255,255,0.8)", fontSize:12 }}>{user.location}</span>
+            <span style={{ color:"rgba(255,255,255,0.8)", fontSize:12 }}>{city}</span>
           </div>
         )}
 
-        {/* Tags */}
-        <div style={{ display:"flex", flexWrap:"wrap", gap:5, marginBottom:10 }}>
-          {interests.slice(0, 4).map((tag) => (
-            <span key={tag} style={{
-              fontSize:10, fontWeight:700, color:"#fff",
-              letterSpacing:"0.06em", textTransform:"uppercase",
-              padding:"3px 10px", borderRadius:99,
-              border:"1.5px solid rgba(255,255,255,0.35)",
-              background:"rgba(255,255,255,0.1)",
-              backdropFilter:"blur(8px)",
-            }}>
-              {tag}
-            </span>
-          ))}
-        </div>
+        {/* Interests tags */}
+        {interests.length > 0 && (
+          <div style={{ display:"flex", flexWrap:"wrap", gap:5, marginBottom:10 }}>
+            {interests.slice(0, 4).map((tag) => (
+              <span key={tag} style={{
+                fontSize:10, fontWeight:700, color:"#fff",
+                letterSpacing:"0.06em", textTransform:"uppercase",
+                padding:"3px 10px", borderRadius:99,
+                border:"1.5px solid rgba(255,255,255,0.35)",
+                background:"rgba(255,255,255,0.1)",
+                backdropFilter:"blur(8px)",
+              }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
 
-        {/* Tên (trong panel) */}
+        {/* Tên + tuổi */}
         <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:10 }}>
           <p style={{ color:"#fff", fontWeight:800, fontSize:16, lineHeight:1.2, textShadow:"0 2px 8px rgba(0,0,0,0.6)", margin:0 }}>
-            {user.fullName}{age ? `, ${age}` : ""}
+            {displayName}{age ? `, ${age}` : ""}
           </p>
           {isOnline && <div style={{ width:8, height:8, background:"#10b981", borderRadius:"50%", border:"2px solid #fff", flexShrink:0 }} />}
         </div>
@@ -241,7 +262,7 @@ const UserCard = ({ user, onLike, onSkip, onMessage, isOnline }) => {
         </div>
       </div>
 
-      {/* Tên + location khi KHÔNG hover (luôn visible ở bottom) */}
+      {/* ── Tên + city khi KHÔNG hover ── */}
       <div style={{
         position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 24,
         padding: "0 14px 14px",
@@ -250,12 +271,12 @@ const UserCard = ({ user, onLike, onSkip, onMessage, isOnline }) => {
         pointerEvents: "none",
       }}>
         <p style={{ color:"#fff", fontWeight:800, fontSize:16, lineHeight:1.2, textShadow:"0 2px 8px rgba(0,0,0,0.7)", margin:0 }}>
-          {user.fullName}{age ? `, ${age}` : ""}
+          {displayName}{age ? `, ${age}` : ""}
         </p>
-        {user.location && (
+        {city && (
           <div style={{ display:"flex", alignItems:"center", gap:4, marginTop:3 }}>
             <MapPin style={{ width:11, height:11, color:"#fb7185", flexShrink:0 }} />
-            <span style={{ color:"rgba(255,255,255,0.6)", fontSize:12 }}>{user.location}</span>
+            <span style={{ color:"rgba(255,255,255,0.6)", fontSize:12 }}>{city}</span>
           </div>
         )}
       </div>

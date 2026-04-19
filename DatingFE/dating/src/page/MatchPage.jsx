@@ -1,4 +1,4 @@
-import { Heart, Users, Star, Zap, RefreshCw, Filter, Sparkles } from "lucide-react";
+import { Heart, Users, Star, Zap, RefreshCw, Filter, Sparkles, Loader2 } from "lucide-react";
 import useMatch from "../components/match/UseMatch";
 import UserCard from "../components/match/UserCard";
 import MatchCard from "../components/match/MatchCard";
@@ -8,26 +8,26 @@ import MatchSkeleton from "../components/skeletons/MatchSkeleton";
 const MatchPage = () => {
   const {
     visibleUsers, likedUsers, matches, onlineUsers, isLoading,
+    isLoadingMore, totalElements, hasMore,
     tab, setTab,
     showFilter, setShowFilter,
     onlineOnly, setOnlineOnly,
-    handleLike, handleSkip, handleMessage, handleRefresh,
+    handleLike, handleSkip, handleMessage, handleRefresh, handleLoadMore,
   } = useMatch();
 
-  /* ── Config tabs & stats ── */
   const tabs = [
     { key: "discover", label: "Khám phá", icon: <Zap   className="w-4 h-4" /> },
     { key: "liked",    label: "Đã thích", icon: <Heart className="w-4 h-4" />, badge: likedUsers.length },
     { key: "matches",  label: "Matches",  icon: <Star  className="w-4 h-4" />, badge: matches.length   },
   ];
   const stats = [
-    { label: "Đề xuất",  value: visibleUsers.length, color: "text-primary",   icon: <Users className="w-4 h-4" /> },
+    { label: "Đề xuất",  value: totalElements,      color: "text-primary",   icon: <Users className="w-4 h-4" /> },
     { label: "Đã thích", value: likedUsers.length,   color: "text-pink-500",  icon: <Heart className="w-4 h-4" /> },
     { label: "Matched",  value: matches.length,      color: "text-amber-500", icon: <Star  className="w-4 h-4" /> },
   ];
 
   return (
-     <div className="min-h-screen bg-base-200 pt-20">
+    <div className="min-h-screen bg-base-200 pt-20">
       {/* ── Header ── */}
       <div className="max-w-6xl mx-auto px-4 pt-5 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -51,7 +51,8 @@ const MatchPage = () => {
           </button>
         </div>
       </div>
-          {/* ── Filter panel ── */}
+
+      {/* ── Filter panel ── */}
       {showFilter && (
         <div className="max-w-6xl mx-auto px-4 pb-3">
           <div className="p-4 bg-base-100 rounded-2xl border border-base-300 shadow-md">
@@ -63,16 +64,17 @@ const MatchPage = () => {
                 checked={onlineOnly}
                 onChange={(e) => setOnlineOnly(e.target.checked)}
               />
-               <span className="text-sm">Chỉ hiện người đang online</span>
-               <span className="badge badge-success badge-sm">
+              <span className="text-sm">Chỉ hiện người đang online</span>
+              <span className="badge badge-success badge-sm">
                 {Math.max(0, onlineUsers.length - 1)} online
               </span>
             </label>
           </div>
-           </div>
+        </div>
       )}
+
       <div className="max-w-6xl mx-auto px-4 pb-14">
-          {/* ── Stats ── */}
+        {/* ── Stats ── */}
         <div className="grid grid-cols-3 gap-3 mb-5">
           {stats.map((s) => (
             <div key={s.label} className="bg-base-100 rounded-2xl p-3 text-center border border-base-300 shadow-sm">
@@ -82,10 +84,11 @@ const MatchPage = () => {
             </div>
           ))}
         </div>
-         {/* ── Tabs ── */}
+
+        {/* ── Tabs ── */}
         <div className="flex gap-1 bg-base-100 p-1 rounded-2xl border border-base-300 mb-6 shadow-sm">
           {tabs.map((t) => (
-             <button
+            <button
               key={t.key}
               onClick={() => setTab(t.key)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200
@@ -95,18 +98,19 @@ const MatchPage = () => {
                 }`}
             >
               {t.icon}
-                {t.label}
+              {t.label}
               {t.badge > 0 && (
-                 <span className={`badge badge-xs ${tab === t.key ? "bg-white/25 text-white border-0" : "badge-error"}`}>
+                <span className={`badge badge-xs ${tab === t.key ? "bg-white/25 text-white border-0" : "badge-error"}`}>
                   {t.badge}
                 </span>
               )}
             </button>
           ))}
         </div>
-         {/* ════ Tab: DISCOVER ════ */}
+
+        {/* ════ Tab: DISCOVER ════ */}
         {tab === "discover" && (
-           isLoading ? (
+          isLoading ? (
             <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
               {[...Array(8)].map((_, i) => <MatchSkeleton key={i} />)}
             </div>
@@ -115,7 +119,7 @@ const MatchPage = () => {
               <div className="w-16 h-16 rounded-full bg-base-100 border border-base-300 flex items-center justify-center mx-auto">
                 <Users className="w-8 h-8 text-base-content/20" />
               </div>
-               <p className="font-semibold text-base-content/40">Không có ai phù hợp</p>
+              <p className="font-semibold text-base-content/40">Không có ai phù hợp</p>
               <button onClick={handleRefresh} className="btn btn-sm btn-primary rounded-2xl gap-2">
                 <RefreshCw className="w-4 h-4" /> Làm mới
               </button>
@@ -129,8 +133,9 @@ const MatchPage = () => {
                     {visibleUsers.length} gợi ý hôm nay
                   </span>
                 </div>
-                 <div className="h-px flex-1 bg-base-300" />
+                <div className="h-px flex-1 bg-base-300" />
               </div>
+
               <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
                 {visibleUsers.map((u) => (
                   <UserCard
@@ -139,16 +144,40 @@ const MatchPage = () => {
                     onLike={handleLike}
                     onSkip={handleSkip}
                     onMessage={handleMessage}
-                    isOnline={onlineUsers.includes(u._id)}
+                    isOnline={onlineUsers.includes(u.userId)}
                   />
                 ))}
               </div>
+
+              {/* ── Load More ── */}
+              {hasMore && (
+                <div className="flex justify-center mt-8">
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={isLoadingMore}
+                    className="btn btn-outline btn-primary rounded-2xl gap-2 px-8"
+                  >
+                    {isLoadingMore ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Đang tải...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        Xem thêm gợi ý
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </>
           )
         )}
-           {/* ════ Tab: LIKED ════ */}
+
+        {/* ════ Tab: LIKED ════ */}
         {tab === "liked" && (
-           likedUsers.length === 0 ? (
+          likedUsers.length === 0 ? (
             <div className="text-center py-28 space-y-3">
               <Heart className="w-12 h-12 text-base-content/20 mx-auto" />
               <p className="text-base-content/40 font-medium">Bạn chưa thích ai cả</p>
@@ -164,7 +193,8 @@ const MatchPage = () => {
             </div>
           )
         )}
-          {/* ════ Tab: MATCHES ════ */}
+
+        {/* ════ Tab: MATCHES ════ */}
         {tab === "matches" && (
           matches.length === 0 ? (
             <div className="text-center py-28 space-y-3">
@@ -175,21 +205,16 @@ const MatchPage = () => {
               </button>
             </div>
           ) : (
-            <>
-              <p className="text-sm text-base-content/50 mb-4">
-                🎉 Bạn có <span className="font-bold text-primary">{matches.length}</span> match mới!
-              </p>
-              <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
-                {matches.map((u) => (
-                  <MatchCard key={u.userId} user={u} onMessage={handleMessage} />
-                ))}
-              </div>
-                </>
+            <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))" }}>
+              {matches.map((u) => (
+                <MatchCard key={u.userId} user={u} onMessage={handleMessage} />
+              ))}
+            </div>
           )
         )}
-
       </div>
     </div>
   );
-}
+};
+
 export default MatchPage;
