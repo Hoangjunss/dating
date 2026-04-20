@@ -68,20 +68,21 @@ public class UserSwipeServiceImpl implements UserSwipeService {
             ConversationResponse convResp = conversationService.createOrGet(fromId, toId, true);
             conversationId = convResp.getId();
 
-            String title = "Trùng hợp!";
+            String titleForAccepter = "Match thành công!";
+            String titleForInitiator = "Có người đồng ý match!";
             notificationService.createAndPush(
                     fromId,
                     NotificationType.NEW_MATCH,
-                    title,
-                    "Bạn và " + toUser.getUsername() + " đã thích nhau — hãy bắt đầu trò chuyện!",
+                    titleForAccepter,
+                    "Bạn đã đồng ý match với " + toUser.getUsername() + ". Hãy bắt đầu trò chuyện nhé!",
                     conversationId,
                     toId
             );
             notificationService.createAndPush(
                     toId,
                     NotificationType.NEW_MATCH,
-                    title,
-                    "Bạn và " + fromUser.getUsername() + " đã thích nhau — hãy bắt đầu trò chuyện!",
+                    titleForInitiator,
+                    fromUser.getUsername() + " đã đồng ý match với bạn. Vào chat ngay thôi!",
                     conversationId,
                     fromId
             );

@@ -63,7 +63,7 @@ public class MessageServiceImpl implements MessageService {
         conversation.setLastActivityAt(Instant.now());
         conversationRepository.save(conversation);
 
-        // notifyPeerNewMessage(conversation, sender, MessageType.TEXT, request.getContent());
+        notifyPeerNewMessage(conversation, sender, MessageType.TEXT, request.getContent());
 
         return MessageMapper.toResponse(message);
     }
@@ -89,7 +89,7 @@ public class MessageServiceImpl implements MessageService {
         conversation.setLastActivityAt(Instant.now());
         conversationRepository.save(conversation);
 
-        // notifyPeerNewMessage(conversation, sender, MessageType.PHOTO, null);
+        notifyPeerNewMessage(conversation, sender, MessageType.PHOTO, null);
 
         return MessageMapper.toResponse(message);
     }

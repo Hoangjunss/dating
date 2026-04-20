@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "in_app_notifications")
+@Table(name = "notifications")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -39,8 +39,7 @@ public class Notification {
     @Column(name = "related_user_id")
     private UUID relatedUserId;
 
-    @Column(nullable = false)
-    @Builder.Default
+    @Column(nullable = false, name = "is_read")
     private boolean read = false;
 
     @Column(nullable = false)
