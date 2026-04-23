@@ -29,9 +29,8 @@ public class UserSwipeServiceImpl implements UserSwipeService {
 
     @Transactional
     @Override
-    public SwipeResultResponse swipe(SwipeRequest request) {
+    public SwipeResultResponse swipe(SwipeRequest request, UUID fromId) {
         log.info("swipe request: {}", request);
-        UUID fromId = request.getFromUserId();
         UUID toId   = request.getToUserId();
 
         if (fromId.equals(toId)) {

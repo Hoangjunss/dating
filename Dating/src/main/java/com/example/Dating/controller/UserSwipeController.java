@@ -29,12 +29,11 @@ public class UserSwipeController {
             Authentication auth) {
 
         UUID fromUserId = (UUID) auth.getPrincipal();
-        request.setFromUserId(fromUserId);   // Override — không tin client
 
         log.info("POST /api/swipes - fromUserId: {}, toUserId: {}, liked: {}",
                 fromUserId, request.getToUserId(), request.isLiked());
 
-        SwipeResultResponse response = userSwipeService.swipe(request);
+        SwipeResultResponse response = userSwipeService.swipe(request, fromUserId);
         return ResponseEntity.ok(response);
     }
 
