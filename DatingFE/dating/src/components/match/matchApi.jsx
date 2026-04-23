@@ -16,12 +16,13 @@ export const fetchSuggestedUsers = async ({ page = 0, size = 10 } = {}) => {
 };
 
 // TODO: POST /api/match/like/:targetUserId
-export const postLike = async (_targetUserId) => {
-  // Uncomment khi có endpoint
-  // const res = await axiosInstance.post(`/match/like/${_targetUserId}`);
-  // return res.data; // { isMatch: boolean }
-  await new Promise((r) => setTimeout(r, 150));
-  return { isMatch: Math.random() > 0.6 };
+export const postSwipe = async (toUserId, isLiked) => {
+  const res = await axiosInstance.post('/swipes', {
+    toUserId,
+    isLiked
+  });
+
+  return res.data; // SwipeResultResponse
 };
 
 // TODO: POST /api/match/skip/:targetUserId

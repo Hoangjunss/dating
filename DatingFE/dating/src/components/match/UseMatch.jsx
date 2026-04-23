@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useChatStore } from "../../store/useChatStore";
-import { fetchSuggestedUsers, postLike, postSkip } from "./matchApi";
+import { fetchSuggestedUsers, postSwipe, postSkip } from "./matchApi";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE = 10;
@@ -86,7 +86,7 @@ const useMatch = () => {
     if (likedUsers.find((u) => u.userId === user.userId)) return null;
     setLikedUsers((p) => [...p, user]);
 
-    const { isMatch } = await postLike(user.userId);
+    const { isMatch } = await postSwipe(user.userId, true);
     if (isMatch) {
       setMatches((p) => [...p, user]);
     }
@@ -96,7 +96,7 @@ const useMatch = () => {
   // ── Bỏ qua ──
   const handleSkip = async (user) => {
     setSkippedIds((p) => new Set([...p, user.userId]));
-    await postSkip(user.userId);
+    await postSwipe(user.userId, false);
   };
 
   // ── Nhắn tin ──
