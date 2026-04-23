@@ -1,4 +1,4 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.request.UserPhotoCreateRequest;
 import com.example.Dating.dtos.response.UserPhotoResponse;
@@ -9,6 +9,8 @@ import com.example.Dating.exception.ValidationException;
 import com.example.Dating.mapper.UserPhotoMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserPhotoRepository;
+import com.example.Dating.service.UserPhotoService;
+import com.example.Dating.service.UserProfileService;
 import com.example.Dating.utils.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

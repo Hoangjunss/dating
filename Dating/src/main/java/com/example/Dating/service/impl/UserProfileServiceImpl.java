@@ -1,4 +1,4 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.request.UserProfileCreateRequest;
 import com.example.Dating.dtos.request.UserProfileUpdateRequest;
@@ -15,6 +15,9 @@ import com.example.Dating.repository.InterestRepository;
 import com.example.Dating.repository.UserPhotoRepository;
 import com.example.Dating.repository.UserProfileRepository;
 import com.example.Dating.repository.UserRepository;
+import com.example.Dating.service.UserInterestService;
+import com.example.Dating.service.UserPreferenceService;
+import com.example.Dating.service.UserProfileService;
 import com.example.Dating.specification.UserProfileSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

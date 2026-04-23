@@ -1,4 +1,4 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.request.ConversationCreateRequest;
 import com.example.Dating.dtos.response.ConversationResponse;
@@ -8,6 +8,9 @@ import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.exception.ValidationException;
 import com.example.Dating.mapper.ConversationMapper;
 import com.example.Dating.repository.ConversationRepository;
+import com.example.Dating.service.AuthService;
+import com.example.Dating.service.ConversationService;
+import com.example.Dating.service.UserMatchService;
 import com.example.Dating.specification.ConversationSpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

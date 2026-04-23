@@ -1,4 +1,4 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.request.SwipeRequest;
 import com.example.Dating.dtos.response.ConversationResponse;
@@ -8,6 +8,7 @@ import com.example.Dating.entities.NotificationType;
 import com.example.Dating.entities.User;
 import com.example.Dating.entities.UserSwipe;
 import com.example.Dating.repository.UserSwipeRepository;
+import com.example.Dating.service.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

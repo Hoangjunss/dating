@@ -1,4 +1,4 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.response.NotificationResponse;
 import com.example.Dating.entities.Notification;
@@ -6,6 +6,8 @@ import com.example.Dating.entities.NotificationType;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.exception.ValidationException;
 import com.example.Dating.repository.NotificationRepository;
+import com.example.Dating.service.NotificationService;
+import com.example.Dating.service.RealtimeNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

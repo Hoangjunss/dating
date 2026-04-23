@@ -1,10 +1,12 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.response.CandidateResponse;
 import com.example.Dating.dtos.response.UserPreferenceResponse;
 import com.example.Dating.entities.*;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.repository.*;
+import com.example.Dating.service.RecommendationService;
+import com.example.Dating.service.UserPreferenceService;
 import com.example.Dating.specification.RecommendationSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.response.UserMatchResponse;
 import com.example.Dating.entities.User;
@@ -8,6 +8,8 @@ import com.example.Dating.exception.ValidationException;
 import com.example.Dating.mapper.UserMatchMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserMatchRepository;
+import com.example.Dating.service.AuthService;
+import com.example.Dating.service.UserMatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,10 +1,12 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.request.PostCreateRequest;
 import com.example.Dating.dtos.response.PostResponse;
 import com.example.Dating.entities.Post;
 import com.example.Dating.entities.User;
 import com.example.Dating.repository.PostRepository;
+import com.example.Dating.service.AuthService;
+import com.example.Dating.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

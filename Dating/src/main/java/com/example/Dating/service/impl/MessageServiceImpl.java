@@ -1,4 +1,4 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.request.MessageSendRequest;
 import com.example.Dating.dtos.request.PhotoSendRequest;
@@ -14,6 +14,7 @@ import com.example.Dating.policy.UnsendPolicy;
 import com.example.Dating.repository.ConversationRepository;
 import com.example.Dating.repository.MessageDeletionRepository;
 import com.example.Dating.repository.MessageRepository;
+import com.example.Dating.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -34,9 +35,9 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository         messageRepository;
     private final MessageDeletionRepository deletionRepository;
     private final ConversationRepository    conversationRepository;
-    private final UserMatchService          userMatchService;
-    private final MessagePhotoService       messagePhotoService;
-    private final AuthService        userService;
+    private final UserMatchService userMatchService;
+    private final MessagePhotoService messagePhotoService;
+    private final AuthService userService;
     private final ApplicationEventPublisher eventPublisher;
     private final UnsendPolicy              unsendPolicy;
     private final NotificationService notificationService;
