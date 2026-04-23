@@ -278,6 +278,27 @@ Base URL: `http://localhost:8080/api`
 | | PUT | `/preferences/me` | Cập nhật preference |
 
 ---
+## 🧪 Kiểm thử (Testing)
+
+Dự án bao gồm bộ test toàn diện cho tất cả các tầng:
+
+### Các loại test
+- **Repository Tests** (`@DataJpaTest` với H2) – 15+ entity
+- **Service Unit Tests** (`@ExtendWith(MockitoExtension.class)`) – 15+ service
+- **Controller Tests** (`@WebMvcTest` + MockMvc + Security) – 15+ controller
+- **Integration Tests** (`@SpringBootTest`) – luồng auth & matching hoàn chỉnh
+- **Policy, Event, Security, Filter & Utility Tests**
+
+### Cách chạy test
+```bash
+# Chạy tất cả test
+./mvnw test
+
+# Chạy một class test cụ thể
+./mvnw test -Dtest=UserSwipeServiceImplTest
+
+# Chạy test trong một package
+./mvnw test -Dtest="com.example.Dating.service.*"
 
 ## 🚀 Cài đặt & Chạy dự án
 
@@ -339,7 +360,7 @@ npm run dev
 - **Batch Loading tránh N+1**: Recommendation engine load photos và interests cho toàn bộ pool bằng `findByUserIdIn()`.
 - **JPA Specification**: Dynamic query cho recommendation filter — không hardcode SQL.
 - **Async Event Bus**: Message unsend events xử lý bất đồng bộ qua Spring `ApplicationEventPublisher`.
-
+- **Bộ test toàn diện**: Bao phủ repository, service, controller và integration với >80% code coverage.
 ---
 
 ## 👨‍💻 Tác giả

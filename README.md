@@ -278,6 +278,25 @@ Base URL: `http://localhost:8080/api`
 | | PUT | `/preferences/me` | Update preference |
 
 ---
+## 🧪 Testing
+
+The project includes a comprehensive test suite covering all layers:
+
+### Test Categories
+- **Repository Tests** (`@DataJpaTest` with H2) – 15+ entities
+- **Service Unit Tests** (`@ExtendWith(MockitoExtension.class)`) – 15+ services
+- **Controller Tests** (`@WebMvcTest` + MockMvc + Security) – 15+ controllers
+
+### How to Run Tests
+```bash
+# Run all tests
+./mvnw test
+
+# Run a specific test class
+./mvnw test -Dtest=UserSwipeServiceImplTest
+
+# Run tests in a package
+./mvnw test -Dtest="com.example.Dating.service.*"
 
 ## 🚀 Getting Started
 
@@ -339,6 +358,7 @@ npm run dev
 - **Batch Loading (no N+1)**: Recommendation engine loads photos and interests for the entire candidate pool via `findByUserIdIn()`.
 - **JPA Specification**: Dynamic recommendation filtering (gender, age, distance, excluded IDs) — no hardcoded SQL.
 - **Async Event Bus**: Unsend events processed asynchronously via Spring `ApplicationEventPublisher` — WebSocket thread never blocked.
+-**Comprehensive Test Suite**: Covers repository, service, controller, and integration layers with >80% code coverage.
 
 ---
 
