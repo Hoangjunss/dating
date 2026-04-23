@@ -7,7 +7,6 @@ import java.util.UUID;
 
 @Data
 public class SwipeRequest {
-    private UUID fromUserId;
     private UUID toUserId;
 
     @JsonProperty("isLiked")

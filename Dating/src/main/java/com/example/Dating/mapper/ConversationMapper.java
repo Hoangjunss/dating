@@ -13,8 +13,11 @@ public final class ConversationMapper {
                 .userAId(e.getUserA().getUserId())
                 .userBId(e.getUserB().getUserId())
                 .createdAt(e.getCreatedAt())
-                .countUnSeen(e.getMessages().stream()
-                        .filter(message -> message.getSeen() == Boolean.FALSE).toList().size()
+                .countUnSeen(
+                        e.getMessages() == null ? 0 :
+                                (int) e.getMessages().stream()
+                                        .filter(m -> Boolean.FALSE.equals(m.getSeen()))
+                                        .count()
                 )
                 .lastMessage(MessageMapper.toResponse(
                         (e.getMessages() != null && !e.getMessages().isEmpty())
