@@ -1,4 +1,4 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.request.LoginRequest;
 import com.example.Dating.dtos.request.RefreshTokenRequest;
@@ -15,6 +15,7 @@ import com.example.Dating.mapper.UserMapper;
 import com.example.Dating.repository.UserEloScoreRepository;
 import com.example.Dating.repository.UserRepository;
 import com.example.Dating.security.JwtTokenProvider;
+import com.example.Dating.service.AuthService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.request.UserPreferenceRequest;
 import com.example.Dating.dtos.response.UserPreferenceResponse;
@@ -6,6 +6,7 @@ import com.example.Dating.entities.UserPreference;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.UserPreferenceMapper;
 import com.example.Dating.repository.UserPreferenceRepository;
+import com.example.Dating.service.UserPreferenceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

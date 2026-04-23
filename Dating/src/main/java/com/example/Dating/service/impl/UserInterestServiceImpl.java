@@ -1,4 +1,4 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.request.UserInterestRequest;
 import com.example.Dating.dtos.response.UserInterestResponse;
@@ -11,6 +11,8 @@ import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.UserInterestMapper;
 import com.example.Dating.mapper.UserProfileMapper;
 import com.example.Dating.repository.UserInterestRepository;
+import com.example.Dating.service.AuthService;
+import com.example.Dating.service.UserInterestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

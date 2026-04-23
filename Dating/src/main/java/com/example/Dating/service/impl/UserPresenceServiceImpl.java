@@ -1,10 +1,11 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.dtos.response.UserPresenceResponse;
 import com.example.Dating.entities.UserPresence;
 import com.example.Dating.exception.ResourceNotFoundException;
 import com.example.Dating.mapper.UserPresenceMapper;
 import com.example.Dating.repository.UserPresenceRepository;
+import com.example.Dating.service.UserPresenceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

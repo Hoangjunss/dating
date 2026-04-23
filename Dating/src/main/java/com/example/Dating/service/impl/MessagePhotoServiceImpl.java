@@ -1,7 +1,8 @@
-package com.example.Dating.service;
+package com.example.Dating.service.impl;
 
 import com.example.Dating.entities.MessagePhotos;
 import com.example.Dating.repository.MessagePhotosRepository;
+import com.example.Dating.service.MessagePhotoService;
 import com.example.Dating.utils.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
